@@ -4,6 +4,12 @@ use warnings;
 use File::Copy;
 use Perl::Tidy;
 
+my $tmp_dir;
+my %Opts;
+
+main();
+
+sub main { #<<<
 my $usage = <<EOM;
 
 This utility runs perltidy on a database of stability test cases. 
@@ -16,7 +22,7 @@ There are four options: run [DEFAULT], pack, merge, unpack ( -r -p -m -u )
 
 usage:
 
-   $0 -h -u -m -p -r [ arg1 arg2 ...
+   $0 -h -u -m -p -r -s [ arg1 arg2 ...
 
 where one parameter may be given to specify the operation to be done:
 
@@ -25,6 +31,8 @@ where one parameter may be given to specify the operation to be done:
      into the default or selected directory
   -m merge files given in arg list into the default or specified database
   -p packs files given in arg list into a new database
+  -e overwrites old expect data with the new results for cases run
+  -s write statistics on parameter frequency to stdout and exit
   -r runs the tests [DEFAULT operation]
 
   arg1 arg2 ... may contain: 
@@ -82,14 +90,16 @@ use Getopt::Long;
 #  i.e., -foo and -nofoo are allowed
 # a double dash signals the end of the options list
 my @option_string = qw(
+  e
   h
   m
   p
   r
+  s
   u
 );
 
-my %Opts = ();
+%Opts = ();
 if ( !GetOptions( \%Opts, @option_string ) ) {
     die "Programming Bug: error in setting default options";
 }
@@ -99,22 +109,25 @@ if ( $Opts{h} ) {
     exit 1;
 }
 
-# set default .data file
-my $db_fname = $0 . ".data";
+# set default .data file and .expect file
+my $db_fname     = $0 . ".data";
+my $expect_fname = $0 . ".expect";
 
 # set tmp dir - you may need to change this depending on setup
 my $git_home = qx[git rev-parse --show-toplevel];
 chomp $git_home;
-my $tmp_dir = $git_home . "/dev-bin/tmp";
+$tmp_dir = $git_home . "/dev-bin/tmp";
 if ( -e $tmp_dir && !-d $tmp_dir ) {
     print STDERR "'$tmp_dir' exists but is not a dir: please fix\n";
     exit 1;
 }
 
-print <<EOM;
+if ( !$Opts{s} ) {
+    print <<EOM;
 default temporary output directory: 
 $tmp_dir
 EOM
+}
 
 # Sift through the args...
 my @files;
@@ -217,6 +230,23 @@ else {
     exit 1;
 }
 
+###################
+# s: run statistics
+###################
+
+if ( $Opts{s} ) {
+    dump_parameter_frequency($rdata_files);
+    exit 1;
+}
+
+my $rexpect_files;
+if ( -e $expect_fname ) {
+    $rexpect_files = read_data_to_hash($expect_fname);
+}
+else {
+    print STDERR "NOTE: Cannot find expect file $expect_fname\n";
+}
+
 ###############
 # m: merge data
 ###############
@@ -247,15 +277,26 @@ EOM
     exit 1;
 }
 
-run_test_cases( $rdata_files, \@cases );
+my ($rexpect_cases_to_update) =
+  run_test_cases( $rdata_files, $rexpect_files, \@cases );
+
+# Option to rewrite expect data
+if ( @{$rexpect_cases_to_update} ) {
+    write_hash_to_data_file( $expect_fname, $rexpect_files );
+}
+
 exit 1;
+}
 
 sub run_test_cases {
-    my ( $rdata_files, $rcases ) = @_;
+    my ( $rdata_files, $rexpect_files, $rcases ) = @_;
 
     print "\nRun log...\n";
     my $rsources = {};
     my $rparams  = {};
+    my $routputs = {};
+    my @expect_cases_to_update;
+    my @expect_differences;
 
     foreach my $fname ( keys %{$rdata_files} ) {
         if ( $fname =~ /^(.*)\.in$/ ) {
@@ -306,6 +347,10 @@ sub run_test_cases {
     }
 
     my @skipped_cases;
+    my $run_count              = 0;
+    my $iteration_total        = 0;
+    my $iteration_maximum      = 0;
+    my $iteration_maximum_case = "";
     foreach my $sname ( sort @selected_cases ) {
 
         # remove any old tmp files for this case
@@ -330,11 +375,13 @@ sub run_test_cases {
         my @output_history;
         for ( my $iteration = 1 ; $iteration <= $iteration_max ; $iteration++ )
         {
+            # FIXME: remove the -irc flag below when several test cases
+            # are corrected to avoid out-of-bounds integer flags
             my $err = Perl::Tidy::perltidy(
                 source      => \$source,
                 destination => \$output,
                 perltidyrc  => \$params,
-                argv        => '',         # don't let perltidy look at my @ARGV
+                argv        => '-irc=1',  # no warnings messages on bad integers
                 stderr    => \$stderr_string,
                 errorfile => \$errorfile_string, # not used when -se flag is set
             );
@@ -360,7 +407,38 @@ sub run_test_cases {
             push @output_history, $output;
 
             if ( $output eq $source ) {
-                print "$sname: converged on iteration $iteration\n";
+                $routputs->{$sname} = $output;
+                my $msg    = "";
+                my $expect = $rexpect_files->{$sname};
+                if ( defined($expect) ) {
+                    if ( $expect ne $output ) {
+
+                        # option -e updates expected output
+                        if ( $Opts{e} ) {
+                            $msg = "UPDATING EXPECT";
+                            push @expect_cases_to_update, $sname;
+                            $rexpect_files->{$sname} = $output;
+                        }
+                        else {
+                            push @expect_differences, $sname;
+                            $msg = "FORMATTING CHANGED";
+                        }
+                    }
+                }
+                else {
+                    $msg = "..NEW";
+                    push @expect_cases_to_update, $sname;
+                    $rexpect_files->{$sname} = $output;
+                }
+                print "$sname: converged on iteration $iteration $msg\n";
+
+                $run_count++;
+                $iteration_total += $iteration;
+                if ( $iteration > $iteration_maximum ) {
+                    $iteration_maximum      = $iteration;
+                    $iteration_maximum_case = $sname;
+                }
+
                 last;
             }
             elsif ( $iteration < $iteration_max ) {
@@ -387,7 +465,18 @@ sub run_test_cases {
         }
     }
 
-    print "...\n";
+    print "-" x 31 . "\n";
+    if ( $run_count > 0 ) {
+        my $iteration_mean = sprintf( "%.2f", $iteration_total / $run_count );
+        my $spaces         = " " x length($iteration_maximum_case);
+        print <<EOM;
+<<Stats for $run_count runs>>
+$spaces  converged on iteration $iteration_mean (average)
+$iteration_maximum_case: converged on iteration $iteration_maximum    (max)
+EOM
+    }
+
+    print "-" x 31 . "\n";
     if (@failed_to_converge) {
 
         print <<EOM;
@@ -408,6 +497,39 @@ SKIPPED: these requested cases were not found in the database:
 @skipped_cases
 EOM
     }
+    if (@expect_cases_to_update) {
+        my $new_expect = @expect_cases_to_update;
+        print <<EOM;
+NEW: added $new_expect cases to .expect: @expect_cases_to_update
+EOM
+    }
+    if (@expect_differences) {
+
+        # Write first few differences
+        my $count = 0;
+        my $msg = "See the .in .par .new and .exp files in the ./tmp directory";
+        foreach my $sname (@expect_differences) {
+            $count++;
+            if ( $count > 5 ) {
+                $msg .= " for the first 5 cases";
+                last;
+            }
+            my $sfile = $opath . $sname . ".in";
+            my $pfile = $opath . $sname . ".par";
+            my $nfile = $opath . $sname . ".new";
+            my $efile = $opath . $sname . ".exp";
+            write_file( $sfile, $rsources->{$sname},      1 );
+            write_file( $pfile, $rparams->{$sname},       1 );
+            write_file( $nfile, $routputs->{$sname},      1 );
+            write_file( $efile, $rexpect_files->{$sname}, 1 );
+        }
+
+        print <<EOM;
+DIFFERENCES: these cases gave unexpected output; use -e to update .expect:
+@expect_differences
+EOM
+    }
+    return ( \@expect_cases_to_update );
 }
 
 sub read_data_to_hash {
@@ -426,13 +548,13 @@ sub read_data_to_hash {
     }
 
     my $dstring = get_string($db_fname);
-    my @lines   = split /\n/, $dstring;
-    my $lines   = @lines;
+    my @lines   = split /^/, $dstring;
     my $fname   = "";
     my $lno     = 0;
     my $string;
 
     foreach my $line (@lines) {
+        chomp $line;
         $lno++;
         if ( $line =~ /^==>\s*([\w\.]+)\s*<==/ ) {
             if ($string) {
@@ -509,6 +631,41 @@ $num_old total files in merged data
 EOM
 
     write_hash_to_data_file( $db_fname, $rold_data );
+    return;
+}
+
+sub dump_parameter_frequency {
+    my ($rdata_files) = @_;
+
+    # Dump a list of parameters and the number of times they appear
+    my $rcount = {};
+
+    foreach my $fname ( keys %{$rdata_files} ) {
+        if ( $fname =~ /^(.*)\.par$/ ) {
+            my $string = $rdata_files->{$fname};
+            my @lines  = split /^/, $string;
+            foreach my $line (@lines) {
+                $line =~ s/^\s+//;
+                $line =~ s/\s+$//;
+                if ( $line && $line =~ /^-/ ) {
+                    if ( $line =~ /^-+(\w[\w-]*)/ ) {
+                        $rcount->{$1}++;
+                    }
+                }
+            }
+        }
+    }
+
+    # For a spreadsheet:
+##  my @sorted_keys = sort { $rcount->{$b} <=> $rcount->{$a} } keys %{$rcount};
+##  foreach my $key (@sorted_keys) {
+##      print "$rcount->{$key}, $key\n";
+##  }
+
+    # For a script:
+    use Data::Dumper;
+    print Dumper($rcount);
+
     return;
 }
 

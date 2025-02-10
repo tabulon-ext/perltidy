@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use Getopt::Long;
+use IO::File;
 
 my $usage = <<EOM;
 
@@ -41,7 +42,6 @@ my $script  = 'bin/perltidy';
 my @modules = qw(
   lib/Perl/Tidy.pm
   lib/Perl/Tidy/Debugger.pm
-  lib/Perl/Tidy/DevNull.pm
   lib/Perl/Tidy/Diagnostics.pm
   lib/Perl/Tidy/FileWriter.pm
   lib/Perl/Tidy/Formatter.pm
@@ -49,9 +49,6 @@ my @modules = qw(
   lib/Perl/Tidy/IOScalar.pm
   lib/Perl/Tidy/IOScalarArray.pm
   lib/Perl/Tidy/IndentationItem.pm
-  lib/Perl/Tidy/LineBuffer.pm
-  lib/Perl/Tidy/LineSink.pm
-  lib/Perl/Tidy/LineSource.pm
   lib/Perl/Tidy/Logger.pm
   lib/Perl/Tidy/Tokenizer.pm
   lib/Perl/Tidy/VerticalAligner.pm
@@ -86,10 +83,13 @@ $fh_out->print($hash_bang);
 # then copy all modules
 my $changed_count;
 foreach my $module (@modules) {
+    my @non_ascii;
+    my $lno=0;
     my $fh_module;
     open( $fh_module, '<', $module )
       or die "can't open my module file '$module' : $!\n";
     while (<$fh_module>) {
+        $lno++;
         last if /^\s*__END__\s*$/;
         my $line = $_;
         if (   $Opts{'D'}
@@ -105,8 +105,25 @@ EOM
         }
 
         $fh_out->print($line) unless $line =~ /^use Perl::Tidy/;
+
+        if ( $line =~ /[^[:ascii:]]/g ) {
+            my $pos = pos($line);
+            push @non_ascii, [ $lno, $pos ];
+        }
     }
     $fh_module->close();
+
+    if (@non_ascii) {
+        my $num = @non_ascii;
+        my ( $lno_first, $pos_first ) = @{ $non_ascii[0] };
+        print STDERR <<EOM;
+==============================================================================
+Warning: Found $num non-ascii characters in module: $module
+First at line $lno_first near character $pos_first
+Please avoid non-ascii characters in the perltidy source.
+==============================================================================
+EOM
+    }
 }
 
 # then, copy the rest of the script except for the 'use PerlTidy' statement

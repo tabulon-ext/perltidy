@@ -1,19 +1,20 @@
 # Checklist for preparing a new version and/or release
 
 - basic quality control:
-  - 'make test' successful for all commit canditates
-  - run 'devbin/run__convergence_tests.pl' for all commit candidates
-  - Run perlcritic
+  - 'make test' successful for all commit candidates
+  - run ``devbin/run_convergence_tests.pl`` for all commit candidates
+  - run perlcritic
   - run NYTProf and check the activity and performance of all changed code
-  - suggested random testing minimum test duration without irregularities:
+  - IMPORTANT: random testing minimum test duration without irregularities:
     - 3 cpu hours for a commit candidate
-    - 8 cpu hours for a +0.01 version bump candidate
-    - 24 cpu hours for a new release candidate
+    - 24 cpu hours for a +0.01 version bump candidate
+    - 100 cpu hours for a new integer release candidate for CPAN
   - run 'author tests' on a much larger body of code than is covered by the .t
     files.
       - compare results of the current version with previous version
 - review tickets at [rt.cpan.org](https://rt.cpan.org/Public/Dist/Display.html?Name=Perl-Tidy) 
 - review the issues at [github](https://github.com/perltidy/perltidy/issues/)
+- test perltidy -D on a large test file
 - compare formatting with the new version with previous version on all files in test area
 - compare formatting with the new version on selected projects and perltidy itself
 - profile with Devel::NYTProf with different parameters and compare with previous version: For example
@@ -22,19 +23,25 @@
 - compare run time with previous version
 - review tickets at sourceforge (hardly used now, but possible)
 - review/update the CHANGES.md file
+- Check/update copyright date: perltidy and Tidy.pm (2 places)
 - be sure RPerl still works:
   - build and install the latest Perl::Tidy on development machine
-  - install the latest RPerl [currently RPerl-5.002000]
+  - install the latest RPerl [currently RPerl-7.000000]
   - perl Makefile.PL, make, make test - should complete ok
 - Review code, especially any ## commented out sections and "FIXME's"
-- run perlver on all modules to check minimum version; should be 5.8.0
+- run perlver on all modules to check minimum version; should be 5.8.1
   - The first line in Tidy.pm has the required version of Perl
-  - use perlbrew to do local checks and debugging on earlier versions of perl if desired
+  - use perlbrew to do local checks and debugging on earlier versions of perl
+   - perlbrew list               [show installed versions]
+   - perlbrew available --all    [show all available versions]
+     - or see https://www.cpan.org/src/README.html
+   - perlbrew install perl-5.8.1 [install perl-5.8.1, may need to force]
+   - perlbrew use perl-5.8.1     [switch to 5.8.1 in current shell]
 - Run tidyall -a to be sure code is tidied
   - note that I have tidyall set to also run perlcritic right now
 - run podchecker on all .pod files
 - run ispell on all .pod files
-- Be sure builds at Travis.CI and Appveyor are clean for all version of perl
+- Be sure builds at github and Appveyor are clean for all version of perl
 - update VERSION numbers in all modules and some docs (build.pl can do this):
    - lib/Perl/Tidy.pm
    - lib/Perl/Tidy.pod
@@ -55,8 +62,9 @@
   (this is an option in build.pl after making a new .tar.gz)
 - Do test installs on several systems 
 - Review the suggestions in Release::Checklist
-
      https://metacpan.org/pod/Release::Checklist
+   and the Berlin concensus
+     https://github.com/Perl-Toolchain-Gang/toolchain-site/blob/master/berlin-consensus.md
 
 - Upload Release to CPAN
 - Update CPAN tickets

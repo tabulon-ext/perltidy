@@ -52,8 +52,10 @@ BEGIN {
 -msc=10 -dbc -dp
 ----------
         'comments3' => <<'----------',
-# testing --maximum-consecutive-blank-lines=2 and --indent-spaced-block-comments --no-format-skipping
--mbl=2 -isbc -nfs
+--maximum-consecutive-blank-lines=2   # -mbl=2
+--indent-spaced-block-comments        # -isbc
+--no-format-skipping                  # -nfs
+--ignore-perlcritic-comments          # -ipc
 ----------
         'comments4' => <<'----------',
 # testing --keep-old-blank-lines=2 [=all] and 
@@ -171,6 +173,10 @@ sub macro_get_names { #
                 1, 3, 3, 1,
                 1, 4, 6, 4, 1,);
 #>>
+
+    local $Test::Builder::Level = $Test::Builder::Level + 1; ## no critic (Variables::ProhibitPackageVars)
+
+    ## no critic (ValuesAndExpressions::RequireInterpolationOfMetachars)
 
 
 
@@ -446,6 +452,10 @@ my @list = ( 1, 1, 1, 1, 2, 1, 1, 3, 3, 1, 1, 4, 6, 4, 1, );
 
 #>>
 
+local $Test::Builder::Level = $Test::Builder::Level + 1; ## no critic (Variables::ProhibitPackageVars)
+
+## no critic (ValuesAndExpressions::RequireInterpolationOfMetachars)
+
 # some blank lines follow
 
 =pod
@@ -521,6 +531,8 @@ sub macro_get_names {          #
 #>>>
 
 my @list = ( 1, 1, 1, 1, 2, 1, 1, 3, 3, 1, 1, 4, 6, 4, 1, );
+
+local $Test::Builder::Level = $Test::Builder::Level + 1;          ## no critic (Variables::ProhibitPackageVars)
 
 
 __END__
@@ -607,6 +619,11 @@ my @list = ( 1, 1, 1, 1, 2, 1, 1, 3, 3, 1, 1, 4, 6, 4, 1, );
 my @list = ( 1, 1, 1, 1, 2, 1, 1, 3, 3, 1, 1, 4, 6, 4, 1, );
 
 #>>
+
+local $Test::Builder::Level =
+  $Test::Builder::Level + 1;    ## no critic (Variables::ProhibitPackageVars)
+
+## no critic (ValuesAndExpressions::RequireInterpolationOfMetachars)
 
 
 # some blank lines follow
@@ -711,6 +728,10 @@ sub macro_get_names {    #
                 1, 4, 6, 4, 1,);
 #>>
 
+local $Test::Builder::Level = $Test::Builder::Level + 1;    ## no critic (Variables::ProhibitPackageVars)
+
+## no critic (ValuesAndExpressions::RequireInterpolationOfMetachars)
+
 
 
 # some blank lines follow
@@ -809,6 +830,10 @@ my @list = ( 1, 1, 1, 1, 2, 1, 1, 3, 3, 1, 1, 4, 6, 4, 1, );
 
 #>>
 
+local $Test::Builder::Level = $Test::Builder::Level + 1;    ## no critic (Variables::ProhibitPackageVars)
+
+## no critic (ValuesAndExpressions::RequireInterpolationOfMetachars)
+
 # some blank lines follow
 
 =pod
@@ -836,7 +861,8 @@ Some pod after __END__ to delete with -dp and trim with -trp
 # This single line should break into multiple lines, even with -l=0
 # sub 'tight_paren_follows' should break the do block
 $body =
-  SOAP::Data->name('~V:Fault')->attr( { 'xmlns' => $SOAP::Constants::NS_ENV } )
+  SOAP::Data->name('~V:Fault')
+  ->attr( { 'xmlns' => $SOAP::Constants::NS_ENV } )
   ->value(
     \SOAP::Data->set_value(
         SOAP::Data->name(
@@ -1029,12 +1055,12 @@ $i++;
 # git22: Preserve function signature on a single line
 # This behavior is controlled by 'sub weld_signature_parens'
 
-sub foo ( $x, $y = "abcd" ) {
+sub foo( $x, $y = "abcd" ) {
     $x . $y;
 }
 
 # do not break after closing do brace
-sub foo ( $x, $y = do { {} }, $z = 42, $w = do { "abcd" } ) {
+sub foo( $x, $y = do { {} }, $z = 42, $w = do { "abcd" } ) {
     $x . $y . $z;
 }
 

@@ -151,6 +151,14 @@ Requested range of profiles is $np_beg to $np_end
 EOM
 }
 
+# move any GO.sh to a backup to prevent accidentally running multiple copies
+my $GO_file = "GO.sh";
+if ( -e $GO_file ) {
+    my $bak = "$GO_file.bak";
+    if ( -e $bak ) { unlink $bak }
+    system("mv $GO_file $bak");
+}
+
 # Outer loop over files
 my $file_count = 0;
 my $case       = 0;
@@ -185,11 +193,11 @@ for ( my $nf = $nf_beg ; $nf <= $nf_end ; $nf++ ) {
     my $ofile_size_min_expected = 0;
 
     my $error_flag    = 0;
-    my $restart_count = 0;
     my $efile_count   = 0;
     my $has_starting_error;
     my $starting_syntax_ok = 1;
     my $tmperr             = "STDERR.txt";
+    my $cmd;
 
     # Inner loop over profiles for a given file
     for ( my $np = $np_beg ; $np <= $np_end ; $np++ ) {
@@ -211,7 +219,7 @@ for ( my $nf = $nf_beg ; $nf <= $nf_end ; $nf++ ) {
         if ( -e $tmperr ) { unlink $tmperr }
 
         #my $cmd = "$binfile <$ifile >$ofile -pro=$profile 2>$tmperr";
-        my $cmd =
+        $cmd =
           "$binfile <$ifile >$ofile -pro=$profile $append_flags 2>$tmperr";
         system_echo( $cmd, $hash );
         my $efile   = "perltidy.ERR";
@@ -321,7 +329,7 @@ for ( my $nf = $nf_beg ; $nf <= $nf_end ; $nf++ ) {
         # Do a syntax check if requested
         if ( $do_syntax_check && $starting_syntax_ok ) {
             my $synfile = "$ofile.syntax";
-            my $cmd     = "perl -c $ofile 2>$synfile";
+            $cmd     = "perl -c $ofile 2>$synfile";
             system_echo( $cmd, $hash );
             my $fh;
             if ( open( $fh, '<', $synfile ) ) {
@@ -350,8 +358,8 @@ for ( my $nf = $nf_beg ; $nf <= $nf_end ; $nf++ ) {
 
         # run perltidy on the output to see if it can be reformatted
         # without errors
-        my $cmd2 = "$binfile <$ofile >$chkfile";
-        system_echo( $cmd2, $hash );
+        $cmd = "$binfile <$ofile >$chkfile";
+        system_echo( $cmd, $hash );
 
         #print STDERR "$cmd2\n";
         my $err;
@@ -409,7 +417,7 @@ for ( my $nf = $nf_beg ; $nf <= $nf_end ; $nf++ ) {
 
             # reduce this value to increase the fraction of chaining;
             # 0.5 gives equal probability of chain/nochain
-            my $frac_no_chain = 0.4;
+            my $frac_no_chain = 0.25;
 
             #if ( $chain_mode == 1 || int( rand(1) + 0.5 ) ) {
             if ( $chain_mode == 1 || rand(1) > $frac_no_chain ) {
@@ -600,19 +608,18 @@ EOM
 }
 
 # Write a script to automate search for errors
-write_runme();
+write_runme('RUNME.pl');
 
 # Write a restart file
-my ( $nf, $np );
 if ( $case < $np_end ) {
-    $nf = $file_count;
-    $np = $case + 1;
-    write_GO( $nf, $np );
+    my $nf = $file_count;
+    my $np = $case + 1;
+    write_GO( $GO_file, $nf, $np );
 }
 elsif ( $file_count < $nf_end ) {
-    $nf = $file_count + 1;
-    $np = 1;
-    write_GO( $nf, $np );
+    my $nf = $file_count + 1;
+    my $np = 1;
+    write_GO( $GO_file, $nf, $np );
 }
 
 print STDERR <<EOM;
@@ -705,17 +712,16 @@ EOM
 
 sub write_GO {
 
-    my ( $nf, $np ) = @_;
-    my $runme = "GO.sh";
+    my ( $ofile, $nf, $np ) = @_;
 
-    #unlink $runme if ( -e $runme );
-    if ( -e $runme ) {
-        my $bak = "$runme.bak";
+    #unlink $ofile if ( -e $ofile );
+    if ( -e $ofile ) {
+        my $bak = "$ofile.bak";
         if ( -e $bak ) { unlink $bak }
-        system("mv $runme $bak");
+        system("mv $ofile $bak");
     }
     my $fh;
-    open( $fh, '>', $runme ) || die "cannot open $runme: $!\n";
+    open( $fh, '>', $ofile ) || die "cannot open $ofile: $!\n";
     $fh->print(<<EOM);
 #!/bin/sh
 
@@ -726,16 +732,17 @@ echo "Perltidy random run ..."
 echo "NOTE: Create a file named 'stop.now' to force an early exit"
 sleep 2
 nohup nice -n19 perltidy_random_run.pl $nf.$np >>nohup.my 2>>nohup.my
+perl RUNME.pl
 EOM
-    system("chmod +x $runme");
-    print STDOUT "To restart, enter ./$runme\n";
+    system("chmod +x $ofile");
+    print STDOUT "To restart, enter ./$ofile\n";
 }
 
 sub write_runme {
 
     # Write a script RUNME.pl which can find problems in nohup.my
-    my $runme = 'RUNME.pl';
-    if ( open( RUN, '>', $runme ) ) {
+    my ($ofile) = @_;
+    if ( open( RUN, '>', $ofile ) ) {
         print RUN <<'EOM';
 #!/usr/bin/perl -w
 my $nohup = "nohup.my";
@@ -768,22 +775,56 @@ foreach my $line (@lines) {
 }
 close IN;
 close OUT;
+print STDERR "\n";
 my $gfile="nohup.my.grep";
 my $cmd1 = "grep 'Thank you' ERR.* >>$gfile";
 my $cmd2 = "grep 'Thank you' *.ERR >>$gfile";
 system ($cmd1);
 system ($cmd2);
-print STDERR "$count problems seen in $nohup\n";
 if ($count) {
-    print STDERR "please see $ofile\n";
+    print STDERR "**$count problems seen in $nohup. please see '$ofile'\n";
+}
+else {
+    print STDERR "$count problems seen in $nohup\n";
 }
 if (-s $gfile) {
-   print STDERR "please see $gfile\n";
+   print STDERR "**please see $gfile\n";
 }
+
+if (-d 'BLINKERS') {
+   print STDERR "**BLINKERS directory exists - please check\n";
+}
+my @ERR = glob('*.ERR');
+if (@ERR) {
+   my $num=@ERR;
+   print STDERR "**Found $num .ERR files\n";
+}
+
+# Backup 'nohup.my'
+my $basename = 'nohup.my';
+if ( -e $basename ) {
+    my $ext;
+    my $bname;
+    for ( my $j = 1 ; $j < 99 ; $j++ ) {
+        $ext   = 'ba' . $j;
+        $bname = "$basename.$ext";
+        next if ( -e $bname || -e $bname . ".gz" );
+        system "mv $basename $bname";
+        last;
+    }
+    if ($bname) {
+        print "Moved $basename -> $bname\n";
+    }
+    else {
+        die "**too many backup versions of $basename - move some\n";
+    }
+}
+system("get_perltidy.pl -b=2");
+print "Enter './GO.sh' to continue\n";
 EOM
         close RUN;
-        system("chmod +x $runme");
-        print "Wrote '$runme'\n";
+        system("chmod +x $ofile");
+        print "Wrote '$ofile'\n";
         return;
     }
 }

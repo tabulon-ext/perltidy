@@ -186,7 +186,6 @@ sub { @J::ISA = qw/F/; @H::ISA = qw/K G/ },
 sub { @H::ISA = qw/G/; @B::ISA = qw/B/ },
 sub { @B::ISA = qw//; @K::ISA = qw/K J I/ },
 sub { @K::ISA = qw/J I/; @D::ISA = qw/A H B C/ },
-return;
 );
 my %extractor_for = (
     quotelike => [ $ws, $variable,    $id, { MATCH => \&extract_quotelike } ],
@@ -561,7 +560,6 @@ doit(
     sub { @H::ISA = qw/G/;   @B::ISA = qw/B/ },
     sub { @B::ISA = qw//;    @K::ISA = qw/K J I/ },
     sub { @K::ISA = qw/J I/; @D::ISA = qw/A H B C/ },
-    return;
 );
 my %extractor_for = (
     quotelike => [ $ws, $variable,    $id, { MATCH => \&extract_quotelike } ],
@@ -680,7 +678,6 @@ doit(
     sub { @H::ISA = qw/G/;   @B::ISA = qw/B/ },
     sub { @B::ISA = qw//;    @K::ISA = qw/K J I/ },
     sub { @K::ISA = qw/J I/; @D::ISA = qw/A H B C/ },
-    return;
 );
 my %extractor_for = (
     quotelike => [ $ws, $variable,    $id, { MATCH => \&extract_quotelike } ],
@@ -711,7 +708,7 @@ exit 1;
 # with -kgb, do no break after last my
 sub next_sibling {
     my $self     = shift;
-    my $parent   = $_PARENT{ refaddr $self} or return '';
+    my $parent   = $_PARENT{ refaddr $self } or return '';
     my $key      = refaddr $self;
     my $elements = $parent->{children};
     my $position = List::MoreUtils::firstidx {
@@ -732,7 +729,7 @@ sub next_sibling {
 sub next_sibling {
 
     my $self     = shift;
-    my $parent   = $_PARENT{ refaddr $self} or return '';
+    my $parent   = $_PARENT{ refaddr $self } or return '';
     my $key      = refaddr $self;
     my $elements = $parent->{children};
     my $position = List::MoreUtils::firstidx {
