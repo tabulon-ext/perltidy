@@ -34,7 +34,7 @@ to precisely control the formatting details.
 
 Perltidy should run on any system with perl 5.008 or later.
 The total disk space needed after removing the installation directory will be
-about 2 Mb.
+about 4 Mb.
 
 
 ## Download
@@ -58,7 +58,7 @@ test and install using the Makefile.PL:
     make install
 
 The [INSTALL file](./INSTALL.html) has additional installation notes. They
-are mainly for older sytems but also tell how to use perltidy without doing an installation.
+are mainly for older systems but also tell how to use perltidy without doing an installation.
 
 ## Links
 

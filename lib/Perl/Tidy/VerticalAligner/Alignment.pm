@@ -4,32 +4,16 @@
 # on a single column being aligned
 #
 #####################################################################
+
 package Perl::Tidy::VerticalAligner::Alignment;
 use strict;
 use warnings;
 
-{ #<<< A non-indenting brace
-
-our $VERSION = '20220613';
-
-BEGIN {
-
-    # Indexes for variables in $self.
-    # Do not combine with other BEGIN blocks (c101).
-    #    _column_          # the current column number
-    #    _saved_column_    # a place for temporary storage
-    my $i = 0;
-    use constant {
-        _column_       => $i++,
-        _saved_column_ => $i++,
-    };
-}
+our $VERSION = '20250214.02';
 
 sub new {
     my ( $class, $rarg ) = @_;
-    my $self = bless [], $class;
-    $self->[_column_]       = $rarg->{column};
-    $self->[_saved_column_] = $rarg->{saved_column};
+    my $self = bless $rarg, $class;
     return $self;
 }
 
@@ -42,17 +26,17 @@ sub AUTOLOAD {
     return if ( $AUTOLOAD =~ /\bDESTROY$/ );
     my ( $pkg, $fname, $lno ) = caller();
     my $my_package = __PACKAGE__;
-    print STDERR <<EOM;
+    print {*STDERR} <<EOM;
 ======================================================================
 Error detected in package '$my_package', version $VERSION
 Received unexpected AUTOLOAD call for sub '$AUTOLOAD'
-Called from package: '$pkg'  
+Called from package: '$pkg'
 Called from File '$fname'  at line '$lno'
 This error is probably due to a recent programming change
 ======================================================================
 EOM
     exit 1;
-}
+} ## end sub AUTOLOAD
 
 sub DESTROY {
 
@@ -60,23 +44,25 @@ sub DESTROY {
 }
 
 sub get_column {
-    return $_[0]->[_column_];
+    my $self = shift;
+    return $self->{'column'};
 }
 
 sub increment_column {
-    $_[0]->[_column_] += $_[1];
+    my ( $self, $pad ) = @_;
+    $self->{'column'} += $pad;
     return;
 }
 
 sub save_column {
-    $_[0]->[_saved_column_] = $_[0]->[_column_];
+    my $self = shift;
+    $self->{'saved_column'} = $self->{'column'};
     return;
 }
 
 sub restore_column {
-    $_[0]->[_column_] = $_[0]->[_saved_column_];
+    my $self = shift;
+    $self->{'column'} = $self->{'saved_column'};
     return;
 }
-} ## end of package VerticalAligner::Alignment
 1;
-

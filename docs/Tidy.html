@@ -45,7 +45,7 @@
         errorfile         =&gt; $errorfile,
         teefile           =&gt; $teefile,
         debugfile         =&gt; $debugfile,
-        formatter         =&gt; $formatter,           # callback object (see below)
+        formatter         =&gt; $formatter,    # callback object (see below)
         dump_options      =&gt; $dump_options,
         dump_options_type =&gt; $dump_options_type,
         prefilter         =&gt; $prefilter_coderef,
@@ -65,17 +65,17 @@
 
 <p>The module accepts input and output streams by a variety of methods. The following list of parameters may be any of the following: a filename, an ARRAY reference, a SCALAR reference, or an object with either a <b>getline</b> or <b>print</b> method, as appropriate.</p>
 
-<pre><code>        source            - the source of the script to be formatted
-        destination       - the destination of the formatted output
-        stderr            - standard error output
-        perltidyrc        - the .perltidyrc file
-        logfile           - the .LOG file stream, if any
-        errorfile         - the .ERR file stream, if any
-        dump_options      - ref to a hash to receive parameters (see below),
-        dump_options_type - controls contents of dump_options
-        dump_getopt_flags - ref to a hash to receive Getopt flags
-        dump_options_category - ref to a hash giving category of options
-        dump_abbreviations    - ref to a hash giving all abbreviations</code></pre>
+<pre><code>    source            - the source of the script to be formatted
+    destination       - the destination of the formatted output
+    stderr            - standard error output
+    perltidyrc        - the .perltidyrc file
+    logfile           - the .LOG file stream, if any
+    errorfile         - the .ERR file stream, if any
+    dump_options      - ref to a hash to receive parameters (see below),
+    dump_options_type - controls contents of dump_options
+    dump_getopt_flags - ref to a hash to receive Getopt flags
+    dump_options_category - ref to a hash giving category of options
+    dump_abbreviations    - ref to a hash giving all abbreviations</code></pre>
 
 <p>The following chart illustrates the logic used to decide how to treat a parameter.</p>
 
@@ -233,15 +233,13 @@
 
 <p>An exit value of 1 indicates that the process had to be terminated early due to errors in the input parameters. This can happen for example if a parameter is misspelled or given an invalid value. The calling program should check for this flag because if it is set the destination stream will be empty or incomplete and should be ignored. Error messages in the <b>stderr</b> stream will indicate the cause of any problem.</p>
 
-<p>An exit value of 2 indicates that perltidy ran to completion but there there are warning messages in the <b>stderr</b> stream related to parameter errors or conflicts and/or warning messages in the <b>errorfile</b> stream relating to possible syntax errors in the source code being tidied.</p>
+<p>An exit value of 2 indicates that perltidy ran to completion but there are warning messages in the <b>stderr</b> stream related to parameter errors or conflicts and/or warning messages in the <b>errorfile</b> stream relating to possible syntax errors in the source code being tidied.</p>
 
 <p>In the event of a catastrophic error for which recovery is not possible <b>perltidy</b> terminates by making calls to <b>croak</b> or <b>confess</b> to help the programmer localize the problem. These should normally only occur during program development.</p>
 
 <h1 id="NOTES-ON-FORMATTING-PARAMETERS">NOTES ON FORMATTING PARAMETERS</h1>
 
 <p>Parameters which control formatting may be passed in several ways: in a <i>.perltidyrc</i> configuration file, in the <b>perltidyrc</b> parameter, and in the <b>argv</b> parameter.</p>
-
-<p>The <b>-syn</b> (<b>--check-syntax</b>) flag may be used with all source and destination streams except for standard input and output. However data streams which are not associated with a filename will be copied to a temporary file before being passed to Perl. This use of temporary files can cause somewhat confusing output from Perl.</p>
 
 <p>If the <b>-pbp</b> style is used it will typically be necessary to also specify a <b>-nst</b> flag. This is necessary to turn off the <b>-st</b> flag contained in the <b>-pbp</b> parameter set which otherwise would direct the output stream to the standard output.</p>
 
@@ -273,8 +271,8 @@
       source      =&gt; \$source_string,
       destination =&gt; \$dest_string,
       stderr      =&gt; \$stderr_string,
-      errorfile   =&gt; \$errorfile_string,    # ignored when -se flag is set
-      ##phasers   =&gt; &#39;stun&#39;,                # uncomment to trigger an error
+      errorfile   =&gt; \$errorfile_string,  # ignored when -se flag is set
+      ##phasers   =&gt; &#39;stun&#39;,              # uncomment to trigger an error
   );
 
   if ($error) {
@@ -401,7 +399,7 @@
 
 <h1 id="VERSION">VERSION</h1>
 
-<p>This man page documents Perl::Tidy version 20220613</p>
+<p>This man page documents Perl::Tidy version 20250214.02</p>
 
 <h1 id="LICENSE">LICENSE</h1>
 

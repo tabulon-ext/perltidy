@@ -32,15 +32,15 @@ source and decoded it from a utf8 but did not re-encode it before storing it in
 the output string.  So the source string was in a different storage mode than
 the output string, and a direct comparison was not meaningful.
 
-This problem is an unintentional result of the historical evolution of perltidy and needs to be fixed.
+This problem is an unintentional result of the historical evolution of perltidy.
 
 The same problem occurs if the destination is an array rather than a string,
 so for simplicity we can limit this discussion to string destinations, which
 are more common.
 
-## How will the problem be fixed?
+## How has the problem been fixed?
 
-A fix is being phased in over a couple of steps. The first step was to
+A fix was phased in over a couple of steps. The first step was to
 introduce a new flag in in version 20220217.  The new flag is
 **--encode-output-strings**, or **-eos**.  When this is set, perltidy will fix
 the specific problem mentioned above by doing an encoding before returning.
@@ -60,9 +60,9 @@ To illustrate using this flag in the above example, we could write
     );
 ```
 
-With this modification we can make a meaningful direct comparison of `$source` and `$output`. The test on `$VERSION` allows this to work with older versions of perltidy (which would not recognize the flag -eos).  An update such as the above can be made right now to facilitate a smooth transition to the new default.
+With this modification we can make a meaningful direct comparison of `$source` and `$output`. The test on `$VERSION` allows this to work with older versions of perltidy (which would not recognize the flag -eos).
 
-In the second step, possibly later in 2022, the new **-eos** flag will become the default.
+In the second step, introduced in version 20220613, the new **-eos** flag became the default.
 
 ## What can go wrong?
 
@@ -115,17 +115,15 @@ A related problem is if an update of Perl::Tidy is made without also updating
 a corrected version of a module such as the above.  To help reduce the chance
 that this will occur the Change Log for perltidy will contain a warning to be
 alert for the double encoding problem, and how to reset the default if
-necessary.  This is also the reason for waiting some time before the second step is made.
+necessary.  This is also the reason for waiting some time before the second step was made.
 
-If double encoding does appear to be occuring after the default change for some program which calls Perl::Tidy, then a quick emergency fix can be made by the program user by setting **-neos** to revert to the old default.  A better fix can eventually be made by the program author by removing the second encoding using a technique such as illustrated above.
+If double encoding does appear to be occurring with the change in the default for some program which calls Perl::Tidy, then a quick emergency fix can be made by the program user by setting **-neos** to revert to the old default.  A better fix can eventually be made by the program author by removing the second encoding using a technique such as illustrated above.
 
 ## Summary
 
 A new flag, **-eos**, has been added to cause Perl::Tidy to behave better as a
-filter when called from other Perl scripts.  This flag will eventually become
-the default setting.  Programs which use Perl::Tidy as a
-filter can be tested right now with the new **-eos** flag to be sure that double
-encoding is not possible when the default is changed.
+filter when called from other Perl scripts.  This flag is the default setting
+in the current release.
 
 ## Reference
 
@@ -152,7 +150,7 @@ the realm of Perl the text must be stored in 'B' mode.
 The source can only be in 'C' mode if it arrives by a call from another Perl
 program, and the destination can only be in 'C' mode if the destination is a
 Perl program.  Otherwise, if the destination is a file, or object with a print
-method, then it will be assumed to be ending its existance as a Perl string and
+method, then it will be assumed to be ending its existence as a Perl string and
 will be placed in an end state which is 'B' mode.
 
 Transition from a starting 'B' mode to 'C' mode is done by a decoding operation
@@ -163,7 +161,7 @@ mode to an ending 'C' mode.
 
 Let us make a list of all possible sets of string storage modes to be sure that
 all cases are covered.  If each of the three stages list above (entry,
-intermedite, and exit) could be in 'B' or 'C' mode then we would have a total
+intermediate, and exit) could be in 'B' or 'C' mode then we would have a total
 of 2 x 2 x 2 = 8 combinations of states.  Each end point may either be a file
 or a string reference. Here is a list of them, with a note indicating which
 ones are possible, and when:

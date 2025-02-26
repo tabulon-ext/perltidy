@@ -1,6 +1,6 @@
 #####################################################################
 #
-# the Perl::Tidy::IndentationItem class supplies items which contain
+# The Perl::Tidy::IndentationItem class supplies items which contain
 # how much whitespace should be used at the start of a line
 #
 #####################################################################
@@ -8,7 +8,8 @@
 package Perl::Tidy::IndentationItem;
 use strict;
 use warnings;
-our $VERSION = '20220613';
+
+our $VERSION = '20250214.02';
 
 BEGIN {
 
@@ -27,12 +28,12 @@ BEGIN {
         _recoverable_spaces_ => $i++,
         _align_seqno_        => $i++,
         _marked_             => $i++,
-        _stack_depth_        => $i++,
         _K_begin_line_       => $i++,
         _arrow_count_        => $i++,
         _standard_spaces_    => $i++,
+        _K_extra_space_      => $i++,
     };
-}
+} ## end BEGIN
 
 sub AUTOLOAD {
 
@@ -43,17 +44,17 @@ sub AUTOLOAD {
     return if ( $AUTOLOAD =~ /\bDESTROY$/ );
     my ( $pkg, $fname, $lno ) = caller();
     my $my_package = __PACKAGE__;
-    print STDERR <<EOM;
+    print {*STDERR} <<EOM;
 ======================================================================
 Error detected in package '$my_package', version $VERSION
 Received unexpected AUTOLOAD call for sub '$AUTOLOAD'
-Called from package: '$pkg'  
+Called from package: '$pkg'
 Called from File '$fname'  at line '$lno'
 This error is probably due to a recent programming change
 ======================================================================
 EOM
     exit 1;
-}
+} ## end sub AUTOLOAD
 
 sub DESTROY {
 
@@ -82,11 +83,12 @@ sub new {
     # align_seqno        =>  # if we are aligning with an opening structure,
     #                        # this is its seqno
     # marked             =>  # if visited by corrector logic
-    # stack_depth        =>  # indentation nesting depth
     # K_begin_line   =>  # first token index K of this level
     # arrow_count        =>  # how many =>'s
 
     my $self = [];
+    bless $self, $class;
+
     $self->[_spaces_]             = $input_hash{spaces};
     $self->[_level_]              = $input_hash{level};
     $self->[_ci_level_]           = $input_hash{ci_level};
@@ -98,14 +100,13 @@ sub new {
     $self->[_recoverable_spaces_] = 0;
     $self->[_align_seqno_]        = $input_hash{align_seqno};
     $self->[_marked_]             = 0;
-    $self->[_stack_depth_]        = $input_hash{stack_depth};
     $self->[_K_begin_line_]       = $input_hash{K_begin_line};
     $self->[_arrow_count_]        = 0;
     $self->[_standard_spaces_]    = $input_hash{standard_spaces};
+    $self->[_K_extra_space_]      = $input_hash{K_extra_space};
 
-    bless $self, $class;
     return $self;
-}
+} ## end sub new
 
 sub permanently_decrease_available_spaces {
 
@@ -113,8 +114,8 @@ sub permanently_decrease_available_spaces {
     # at one indentation item.  NOTE: if there are child nodes, their
     # total SPACES must be reduced by the caller.
 
-    my ( $item, $spaces_needed ) = @_;
-    my $available_spaces = $item->get_available_spaces();
+    my ( $self, $spaces_needed ) = @_;
+    my $available_spaces = $self->get_available_spaces();
     my $deleted_spaces =
       ( $available_spaces > $spaces_needed )
       ? $spaces_needed
@@ -122,14 +123,14 @@ sub permanently_decrease_available_spaces {
 
     # Fixed for c085; a zero value must remain unchanged unless the closed
     # flag has been set.
-    my $closed = $item->get_closed();
-    $item->decrease_available_spaces($deleted_spaces)
-      unless ( $available_spaces == 0 && $closed < 0 );
-    $item->decrease_SPACES($deleted_spaces);
-    $item->set_recoverable_spaces(0);
+    my $closed = $self->get_closed();
+    $self->decrease_available_spaces($deleted_spaces)
+      if ( $available_spaces != 0 || $closed >= 0 );
+    $self->decrease_SPACES($deleted_spaces);
+    $self->set_recoverable_spaces(0);
 
     return $deleted_spaces;
-}
+} ## end sub permanently_decrease_available_spaces
 
 sub tentatively_decrease_available_spaces {
 
@@ -137,30 +138,29 @@ sub tentatively_decrease_available_spaces {
     # for an indentation item.  We may want to undo this later.  NOTE: if
     # there are child nodes, their total SPACES must be reduced by the
     # caller.
-    my ( $item, $spaces_needed ) = @_;
-    my $available_spaces = $item->get_available_spaces();
+    my ( $self, $spaces_needed ) = @_;
+    my $available_spaces = $self->get_available_spaces();
     my $deleted_spaces =
       ( $available_spaces > $spaces_needed )
       ? $spaces_needed
       : $available_spaces;
-    $item->decrease_available_spaces($deleted_spaces);
-    $item->decrease_SPACES($deleted_spaces);
-    $item->increase_recoverable_spaces($deleted_spaces);
+    $self->decrease_available_spaces($deleted_spaces);
+    $self->decrease_SPACES($deleted_spaces);
+    $self->increase_recoverable_spaces($deleted_spaces);
     return $deleted_spaces;
-}
+} ## end sub tentatively_decrease_available_spaces
 
-sub get_stack_depth {
-    return $_[0]->[_stack_depth_];
-}
-
+# time-critical sub
 sub get_spaces {
     return $_[0]->[_spaces_];
 }
 
 sub get_standard_spaces {
-    return $_[0]->[_standard_spaces_];
+    my $self = shift;
+    return $self->[_standard_spaces_];
 }
 
+# time-critical sub
 sub get_marked {
     return $_[0]->[_marked_];
 }
@@ -171,10 +171,11 @@ sub set_marked {
         $self->[_marked_] = $value;
     }
     return $self->[_marked_];
-}
+} ## end sub set_marked
 
 sub get_available_spaces {
-    return $_[0]->[_available_spaces_];
+    my $self = shift;
+    return $self->[_available_spaces_];
 }
 
 sub decrease_SPACES {
@@ -183,22 +184,25 @@ sub decrease_SPACES {
         $self->[_spaces_] -= $value;
     }
     return $self->[_spaces_];
-}
+} ## end sub decrease_SPACES
 
 sub decrease_available_spaces {
     my ( $self, $value ) = @_;
+
     if ( defined($value) ) {
         $self->[_available_spaces_] -= $value;
     }
     return $self->[_available_spaces_];
-}
+} ## end sub decrease_available_spaces
 
 sub get_align_seqno {
-    return $_[0]->[_align_seqno_];
+    my $self = shift;
+    return $self->[_align_seqno_];
 }
 
 sub get_recoverable_spaces {
-    return $_[0]->[_recoverable_spaces_];
+    my $self = shift;
+    return $self->[_recoverable_spaces_];
 }
 
 sub set_recoverable_spaces {
@@ -207,7 +211,7 @@ sub set_recoverable_spaces {
         $self->[_recoverable_spaces_] = $value;
     }
     return $self->[_recoverable_spaces_];
-}
+} ## end sub set_recoverable_spaces
 
 sub increase_recoverable_spaces {
     my ( $self, $value ) = @_;
@@ -215,14 +219,16 @@ sub increase_recoverable_spaces {
         $self->[_recoverable_spaces_] += $value;
     }
     return $self->[_recoverable_spaces_];
-}
+} ## end sub increase_recoverable_spaces
 
 sub get_ci_level {
-    return $_[0]->[_ci_level_];
+    my $self = shift;
+    return $self->[_ci_level_];
 }
 
 sub get_level {
-    return $_[0]->[_level_];
+    my $self = shift;
+    return $self->[_level_];
 }
 
 sub get_spaces_level_ci {
@@ -231,11 +237,18 @@ sub get_spaces_level_ci {
 }
 
 sub get_lp_item_index {
-    return $_[0]->[_lp_item_index_];
+    my $self = shift;
+    return $self->[_lp_item_index_];
 }
 
 sub get_K_begin_line {
-    return $_[0]->[_K_begin_line_];
+    my $self = shift;
+    return $self->[_K_begin_line_];
+}
+
+sub get_K_extra_space {
+    my $self = shift;
+    return $self->[_K_extra_space_];
 }
 
 sub set_have_child {
@@ -244,10 +257,11 @@ sub set_have_child {
         $self->[_have_child_] = $value;
     }
     return $self->[_have_child_];
-}
+} ## end sub set_have_child
 
 sub get_have_child {
-    return $_[0]->[_have_child_];
+    my $self = shift;
+    return $self->[_have_child_];
 }
 
 sub set_arrow_count {
@@ -256,10 +270,11 @@ sub set_arrow_count {
         $self->[_arrow_count_] = $value;
     }
     return $self->[_arrow_count_];
-}
+} ## end sub set_arrow_count
 
 sub get_arrow_count {
-    return $_[0]->[_arrow_count_];
+    my $self = shift;
+    return $self->[_arrow_count_];
 }
 
 sub set_comma_count {
@@ -268,10 +283,11 @@ sub set_comma_count {
         $self->[_comma_count_] = $value;
     }
     return $self->[_comma_count_];
-}
+} ## end sub set_comma_count
 
 sub get_comma_count {
-    return $_[0]->[_comma_count_];
+    my $self = shift;
+    return $self->[_comma_count_];
 }
 
 sub set_closed {
@@ -280,9 +296,10 @@ sub set_closed {
         $self->[_closed_] = $value;
     }
     return $self->[_closed_];
-}
+} ## end sub set_closed
 
 sub get_closed {
-    return $_[0]->[_closed_];
+    my $self = shift;
+    return $self->[_closed_];
 }
 1;

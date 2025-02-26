@@ -135,7 +135,7 @@ my $todaysdate =
     ) ;
 }
 
-# State 2 
+# State 2
 
 {
     my $warningdate = DateCalc( $borrower->{'expiry'},
@@ -1155,7 +1155,7 @@ my $rows =
 ==> b090.par <==
 --break-before-hash-brace-and-indent=1
 --break-before-hash-brace=3
---comma-arrow-breakpoints=2  # Why?? 
+--comma-arrow-breakpoints=2  # Why??
 
 ==> b1002.in <==
                   @cmd=
@@ -1622,7 +1622,7 @@ foreach my $table
     'items',
     'biblio',
     'biblioitems'
-         )) 
+         ))
 __END__
 # S2
 foreach my $table(
@@ -5525,6 +5525,26 @@ is(
 --line-up-parentheses
 --maximum-line-length=44
 --norecombine
+
+==> b1133.in <==
+            $pid=open README,"$html_converter $saved_file |"
+                     or
+                     $CPAN::Frontend->mydie(qq{
+Could not fork '$html_converter $saved_file': $!});
+
+            $pid=open README,"$html_converter $saved_file |"
+              or$CPAN::Frontend->mydie(
+                qq{
+Could not fork '$html_converter $saved_file': $!} );
+
+==> b1133.par <==
+--noadd-whitespace
+--delete-old-whitespace
+--line-up-parentheses
+--maximum-line-length=69
+--norecombine
+--variable-maximum-line-length
+--weld-nested-containers
 
 ==> b1134.in <==
 {
@@ -9920,6 +9940,653 @@ print to_json({success => $success ? 1 : 0});
 --maximum-line-length=60
 --extended-continuation-indentation
 
+==> b1348.in <==
+# S1
+                           $try =
+                             $costs[ $j - $i ][$k]
+                             + $costs[ $k + 1 ][$j]
+                             + $row1 *
+                             $col1 * $col2 ;
+
+# S2
+                           $try =
+                             $costs[ $j - $i ][$k]
+                             + $costs[ $k + 1 ][$j]
+                             + $row1 * $col1 *
+                             $col2 ;
+
+
+==> b1348.par <==
+--blank-lines-after-opening-block=0
+--nobreak-after-all-operators
+--break-at-old-comma-breakpoints
+--nobreak-at-old-semicolon-breakpoints
+--check-syntax
+--closing-side-comment-else-flag=1
+--closing-side-comment-interval=26
+--closing-side-comments
+--comma-arrow-breakpoints=1
+--cuddled-break-option=55
+--cuddled-else
+--nodelete-side-comments
+--noextended-line-up-parentheses
+--nofuzzy-line-length
+--noignore-old-breakpoints
+--noindent-closing-brace
+--indent-columns=9
+--noindent-spaced-block-comments
+--nokeep-interior-semicolons
+--keep-old-breakpoints-after='+= G -> \ [ ^.= ^ % n ]'
+--keyword-group-blanks-delete
+--keyword-paren-inner-tightness=2
+--line-up-parentheses
+--nolook-for-selfloader
+--maximum-consecutive-blank-lines=2
+--maximum-fields-per-table=53
+--maximum-level-errors=86
+--maximum-line-length=26
+--maximum-unexpected-errors=27
+--nomemoize
+--nowant-left-space='> & ||= != < & /= | / >>='
+--noopening-brace-always-on-right
+--opening-hash-brace-right
+--opening-paren-right
+--noopening-sub-brace-on-new-line
+--nooutdent-keywords
+--nooutdent-static-block-comments
+--paren-tightness=2
+--space-after-keyword='do while our while'
+--space-backslash-quote=2
+--nospace-for-semicolon
+--space-terminal-semicolon
+--square-bracket-vertical-tightness-closing=2
+--square-bracket-vertical-tightness=1
+--stack-closing-hash-brace
+--stack-closing-paren
+--stack-opening-paren
+--nostatic-block-comments
+--trim-pod
+--use-unicode-gcstring
+--valign-inclusion-list='-> x= >>= -> **= ( { ^= { :'
+--variable-maximum-line-length
+--vertical-tightness-closing=0
+--vertical-tightness=0
+--want-break-after='=~ <<= *= ^= ^= !~ != &&= += <='
+--want-break-before='x %= >= >>= |= | .= + < +='
+
+==> b1349.in <==
+# S1
+    my ( $database, $primary_id,
+         $optional_id, $comment )
+           = $self
+           ->_rearrange ( [ qw(DATABASE
+                            PRIMARY_ID
+                            OPTIONAL_ID
+                            COMMENT
+                          ) ],
+                          @args ) ;
+
+# S2
+    my($database,$primary_id,
+        $optional_id,$comment)
+           =$self
+           ->_rearrange(
+                       [ qw(DATABASE
+                                PRIMARY_ID
+                                OPTIONAL_ID
+                                COMMENT
+                         )
+                       ],
+                       @args );
+
+
+==> b1349.par <==
+--continuation-indentation=7
+--delete-old-whitespace
+--extended-line-up-parentheses
+--maximum-line-length=37
+--noadd-whitespace
+--variable-maximum-line-length
+--vertical-tightness=2
+--weld-nested-containers
+--break-at-old-method-breakpoints
+
+==> b1354.in <==
+# S1
+while (
+         my ( $sid, $u, $lasttime )
+         = split( /:/, <S> ) )
+
+# S2
+while (my ( $sid, $u, $lasttime )=
+         split( /:/, <S> ) )
+
+
+==> b1354.par <==
+--noadd-whitespace
+--indent-columns=9
+--maximum-line-length=35
+
+==> b1355.in <==
+# S1
+my $data = [
+ { value => "Tom" },
+ { value => 33 },
+ { value => "Sales" },
+];
+
+# S2
+my $data =
+ [ { value => "Tom" }, { value => 33 }, { value => "Sales" }, ];
+
+
+==> b1355.par <==
+--break-before-square-bracket-and-indent=2
+--break-before-square-bracket=2
+--continuation-indentation=9
+--indent-columns=1
+--maximum-line-length=72
+
+==> b1356.in <==
+# S1
+%phonebook = (
+ "Bob"  => "247305",
+ "Phil" => "205832",
+ "Sara" => "226010"
+);
+
+# S2
+%phonebook
+         = (
+   "Bob"  => "247305",
+   "Phil" => "205832",
+   "Sara" => "226010"
+         );
+
+
+==> b1356.par <==
+--continuation-indentation=9
+--extended-line-up-parentheses
+--indent-columns=1
+--maximum-line-length=22
+--want-break-before=' = '
+
+==> b1357.in <==
+# S1
+my ( $m, $i, $j )
+  =( length $P, 0,
+     -1 );
+
+# S2
+my ( $m, $i, $j ) =(
+             length $P, 0,
+             -1 );
+
+==> b1357.par <==
+--break-at-old-comma-breakpoints
+--extended-line-up-parentheses
+--indent-columns=0
+--maximum-line-length=26
+--nowant-right-space='='
+--want-break-before='='
+
+==> b1371.in <==
+# S1
+my (
+$xpos,
+$ypos,
+$font_size
+) =(
+       100,
+       700,
+       12
+);
+
+# S2
+my (
+$xpos,
+$ypos,
+$font_size
+  )
+  =(
+     100,
+     700,
+     12
+  );
+
+
+==> b1371.par <==
+--break-before-all-operators
+--extended-line-up-parentheses
+--indent-columns=0
+--keep-old-breakpoints-before=' )'
+--maximum-line-length=12
+--nowant-right-space='='
+
+==> b1375.in <==
+# S1
+          $self->{'col_ids'} ||= [
+               $self->numbering .. $self->width() + $self->numbering - 1 ]
+            if ( defined( $self->width() ) && $self->width() > 0 );
+
+# S2
+          $self->{'col_ids'} ||=
+            [ $self->numbering .. $self->width() +
+                    $self->numbering - 1 ]
+            if ( defined( $self->width() ) && $self->width() > 0 );
+
+==> b1375.par <==
+--extended-line-up-parentheses
+--indent-columns=10
+--maximum-line-length=58
+--opening-square-bracket-right
+--variable-maximum-line-length
+
+==> b1376.in <==
+# S1
+            unless ( opendir (
+                  CATDIR, $catdir ) )
+# S2
+            unless ( opendir (
+                  CATDIR, $catdir
+            ) )
+
+
+==> b1376.par <==
+--add-trailing-commas
+--want-trailing-commas='b'
+--extended-line-up-parentheses
+--indent-columns=6
+--maximum-line-length=47
+--space-keyword-paren
+--weld-nested-containers
+
+==> b1378.in <==
+                           if($biblio->{subtitle})
+                           {        &newsubtitle(
+                                             $biblionumber,
+                                             $biblio
+                                                ->{subtitle}
+                                             ,);
+                                    }
+
+==> b1378.par <==
+-extrude -vtc=2 -dtc -wtc=0
+
+==> b1379.in <==
+# S1
+print star (
+             'Sol',
+             planet (
+                      'Earth', moon ('Lunar')
+             ), );
+
+# S2
+print star (
+             'Sol',
+             planet (
+                   'Earth', moon ('Lunar'), )
+);
+
+
+==> b1379.par <==
+--add-trailing-commas
+--delete-trailing-commas
+--extended-line-up-parentheses
+--ignore-old-breakpoints
+--indent-columns=3
+--maximum-fields-per-table=27
+--maximum-line-length=40
+--space-function-paren
+--want-trailing-commas='b'
+--variable-maximum-line-length
+--vertical-tightness-closing=2
+
+==> b1381.in <==
+my $formatter = new HTML::FormatPS(
+    'PaperSize'   => 'Letter', 'LeftMargin' => 20,    # in points
+    'RightMargin' => 20,                              # ditto
+    'TopMargin'   => 10, 'BottomMargin' => 30,
+    'FontFamily'  => 'Helvetica', );
+
+my $formatter = new HTML::FormatPS(
+    'PaperSize'   => 'Letter', 'LeftMargin' => 20,    # in points
+    'RightMargin' => 20,                              # ditto
+    'TopMargin'   => 10, 'BottomMargin' => 30, 'FontFamily' => 'Helvetica'
+);
+
+==> b1381.par <==
+--add-trailing-commas
+--comma-arrow-breakpoints=3
+--delete-trailing-commas
+--extended-continuation-indentation
+--ignore-old-breakpoints
+--maximum-line-length=70
+--paren-vertical-tightness-closing=1
+--want-trailing-commas='b'
+--variable-maximum-line-length
+
+==> b1384.in <==
+    eval{
+        my@a=(foo=>'baz',bar=>'quux');
+        validate(@a,
+            {foo=>{regex=>qr/^baz$/},bar=>{regex=>'uqqx'}},
+        );
+    };
+
+    eval{
+        my@a=(foo=>'baz',bar=>'quux');
+        validate(@a,{foo=>{regex=>qr/^baz$/},bar=>{regex=>'uqqx'}});
+    };
+
+
+==> b1384.par <==
+--add-trailing-commas
+--noadd-whitespace
+--continuation-indentation=6
+--delete-old-whitespace
+--delete-trailing-commas
+--extended-continuation-indentation
+--ignore-old-breakpoints
+--maximum-line-length=65
+--paren-vertical-tightness-closing=2
+--variable-maximum-line-length
+--want-trailing-commas='m'
+
+==> b1385.in <==
+(
+    # optional glob
+    {
+        sub    => 'sub26',
+        p      => [ foo => 1, bar => do { local *BAR; *BAR }, ],
+        expect => q{},
+    },
+);
+
+(
+    # optional glob
+    {
+        sub => 'sub26',
+        p   => [
+            foo => 1,
+            bar => do { local *BAR; *BAR }
+        ],
+        expect => q{},
+    },
+);
+
+==> b1385.par <==
+--add-trailing-commas
+--delete-trailing-commas
+--ignore-old-breakpoints
+--want-trailing-commas='m'
+
+==> b1386.in <==
+# S1
+open( OUT,
+      ">"
+              . Bio::Root::IO->catfile(
+                                        "t", "out.pfam"
+              ),
+);
+
+# S2
+open( OUT,
+      ">"
+              . Bio::Root::IO->catfile( "t",
+                                        "out.pfam", ),
+);
+
+==> b1386.par <==
+--add-trailing-commas
+--continuation-indentation=8
+--delete-trailing-commas
+--extended-line-up-parentheses
+--ignore-old-breakpoints
+--indent-columns=3
+--maximum-line-length=52
+--variable-maximum-line-length
+--want-trailing-commas='b'
+
+==> b1387.in <==
+unlink(
+       Bio::Root::IO->catfile(
+                    "t", "gcg.out"
+       )
+);
+
+unlink(
+       Bio::Root::IO->catfile(
+           "t", "gcg.out", )
+);
+
+==> b1387.par <==
+--add-trailing-commas
+--delete-trailing-commas
+--extended-line-up-parentheses
+--ignore-old-breakpoints
+--maximum-line-length=26
+--variable-maximum-line-length
+--want-trailing-commas='b'
+
+==> b1390.in <==
+    seek
+      (
+        FH,
+        $end,
+        0
+        ,
+
+      )
+      ;
+
+    seek
+      (
+        FH,
+        $end,
+        0
+
+      )
+      ;
+
+==> b1390.par <==
+--add-trailing-commas
+--delete-trailing-commas
+--maximum-line-length=1
+--want-trailing-commas='h'
+
+==> b1392.in <==
+if (  ioctl (  STDERR, $TIOCGWINSZ,
+               $winsize, )
+  ) {
+          ...;
+}
+
+if (  ioctl (  STDERR, $TIOCGWINSZ, $winsize
+      )
+  )
+{
+          ...;
+}
+
+==> b1392.par <==
+--add-trailing-commas
+--delete-trailing-commas
+--extended-line-up-parentheses
+--ignore-old-breakpoints
+--indent-columns=10
+--maximum-line-length=45
+--paren-vertical-tightness=2
+--space-keyword-paren
+--want-trailing-commas='b'
+
+==> b1393.in <==
+      push (
+         @guaranteedata,
+         {
+   borrowernumber => $guarantees->[$i]->{'borrowernumber'},
+   cardnumber => $guarantees->[$i]->{'cardnumber'},
+   name => $guarantees->[$i]->{'firstname'} . " ". $guarantees->[$i]->{'surname'}
+         }
+      ) ;
+
+      push (
+         @guaranteedata,
+         {
+   borrowernumber => $guarantees->[$i]->{'borrowernumber'},
+   cardnumber => $guarantees->[$i]->{'cardnumber'},
+   name => $guarantees->[$i]->{'firstname'} . " "
+     . $guarantees->[$i]->{'surname'},
+         }
+      ) ;
+
+==> b1393.par <==
+--add-trailing-commas
+--noadd-whitespace
+--break-before-all-operators
+--delete-trailing-commas
+--indent-columns=3
+--maximum-line-length=69
+--variable-maximum-line-length
+--want-trailing-commas='h'
+--whitespace-cycle=3
+
+==> b1394.in <==
+SOAP::Transport::HTTP::Daemon->new (
+                                    LocalAddr => $host,
+                                    LocalPort => $port,
+                                    Reuse => 1
+)->dispatch_with ({ 'urn:WishListCustomer' => 'WishListCustomer' } )
+  ->objects_by_reference ('WishListCustomer')->handle ;
+
+SOAP::Transport::HTTP::Daemon->new (LocalAddr => $host,
+                                    LocalPort => $port,
+                                    Reuse => 1,)
+  ->dispatch_with ({ 'urn:WishListCustomer' => 'WishListCustomer' } )
+  ->objects_by_reference ('WishListCustomer')->handle ;
+
+
+==> b1394.par <==
+--add-trailing-commas
+--noadd-whitespace
+--comma-arrow-breakpoints=3
+--delete-trailing-commas
+--extended-line-up-parentheses
+--want-trailing-commas='h'
+
+==> b1395.in <==
+                  # The old = break is under stress and must be ignored
+                  if(my ($safari_build, $safari_minor) =
+                        split /\./, $1)
+                  {
+                        ...;
+                  }
+
+                  if(
+                        my ($safari_build, $safari_minor)
+                        = split /\./, $1
+                       )
+                  {
+                        ...;
+                  }
+
+
+==> b1395.par <==
+--continuation-indentation=5
+--indent-columns=6
+--maximum-line-length=57
+--nospace-after-keyword='if'
+--paren-tightness=2
+
+==> b1396.in <==
+     print 'not '
+       unless ( near (
+            great_circle_distance ( 0, 0, 0, pi / 2 ), pi / 2
+       ) );
+
+     print 'not '
+       unless ( near ( great_circle_distance ( 0, 0, 0, pi / 2 ),
+            pi / 2, ) );
+
+
+
+==> b1396.par <==
+--add-trailing-commas
+--delete-trailing-commas
+--extended-continuation-indentation
+--indent-columns=5
+--maximum-line-length=72
+--space-function-paren
+--want-trailing-commas='b'
+--weld-nested-containers
+
+==> b1397.in <==
+         (
+                  my $msg = sprintf (
+                           gettext("%s: fatal error at line %d:\n"), $progname, $line
+                      )
+                      . "@_\n"
+         ) =~ tr/\0//d;
+
+         (
+                  my $msg = sprintf ( gettext("%s: fatal error at line %d:\n"),
+                           $progname, $line, )
+                      . "@_\n"
+         ) =~ tr/\0//d;
+
+
+==> b1397.par <==
+--want-trailing-commas='b'
+--add-trailing-commas
+--delete-trailing-commas
+--continuation-indentation=4
+--indent-columns=9
+--maximum-line-length=92
+--space-keyword-paren
+
+==> b1399.in <==
+use constant GRAPH_SIZE => 100;
+for ( my $i = 0 ;
+      $i < @$data ;
+      $i++ )
+  {
+     $polygon->addPt(
+          ORIGIN_X_COORD
+            + GRAPH_SIZE
+            / ( @$data - 1 )
+            * $i,
+          ORIGIN_Y_COORD
+            - $$data[$i]
+            * GRAPH_SIZE
+            / LOAD_MAX
+     );
+  } ## end for ( my $i = 0; $i < ...)
+
+for ( my $i = 0 ;
+      $i < @$data ;
+      $i++ )
+  {
+     $polygon->addPt(
+          ORIGIN_X_COORD
+            + GRAPH_SIZE
+            / ( @$data - 1 )
+            * $i,
+          ORIGIN_Y_COORD
+            - $$data[$i]
+            * GRAPH_SIZE / LOAD_MAX,
+     );
+  } ## end for ( my $i = 0; $i < ...)
+
+==> b1399.par <==
+--line-up-parentheses
+--maximum-line-length=33
+--keep-old-breakpoints-before='-'
+--variable-maximum-line-length
+--indent-columns=5
+--break-before-all-operators
+--break-at-old-comma-breakpoints
+--brace-left-and-indent
+
 ==> b140.in <==
 $cmd[ $i ]=[
 	 $s, $e, $cmd, \@hunk, $i ] ;
@@ -9935,6 +10602,1140 @@ $cmd[ $i ]=
 --maximum-line-length=31
 --nowant-right-space='=~ >>= ||= %= >>= - | /= //= + - |= !~ <= = ||= =~'
 --variable-maximum-line-length
+
+==> b1401.in <==
+    my $moon_variation =
+           0.6583 *
+           sin(
+        torad(
+            2 * (
+                $moon_corrected_longitude
+                       - $sun_lambda
+            ) ) );
+
+    my $moon_variation =
+           0.6583 * sin( torad(
+        2 * (
+            $moon_corrected_longitude
+                   - $sun_lambda
+        )
+           ) );
+
+
+==> b1401.par <==
+--continuation-indentation=7
+--extended-line-up-parentheses
+--maximum-line-length=32
+--weld-nested-containers
+
+==> b1402.in <==
+ok (  3,
+      int(  at ( sum ( conv2d ( $b, $a, { Boundary => 'Reflect' } ) - $ans ) )
+      ) == 0
+);
+
+ok (  3,
+      int(
+            at ( sum ( conv2d ( $b, $a, { Boundary => 'Reflect' } ) - $ans ) )
+      ) == 0
+);
+
+
+==> b1402.par <==
+--extended-line-up-parentheses
+--indent-columns=9
+--paren-vertical-tightness=1
+--space-function-paren
+--weld-nested-containers
+
+==> b1403.in <==
+ $template->param(
+  index        => $index,
+  index2       => $index2,
+  "f1_$result" => "f1_"
+    . $result,
+ );
+
+ $template->param(
+  index        => $index,
+  index2       => $index2,
+  "f1_$result" => "f1_" . $result
+ );
+
+==> b1403.par <==
+--add-trailing-commas
+--delete-trailing-commas
+--indent-columns=1
+--keep-old-breakpoints-before=')'
+--maximum-line-length=33
+--want-trailing-commas='h'
+
+==> b1404.in <==
+my %MyTokens= (
+    '\tiny'       => { Type => 'local' },
+    '\small'      => { Type => 'local' },
+    '\scriptsize' => { Type => 'local' },
+    '\footnotesize' =>{ Type => 'local' }
+);
+
+my %MyTokens= (
+    '\tiny'       => { Type => 'local' },
+    '\small'      => { Type => 'local' },
+    '\scriptsize' => { Type => 'local' },
+    '\footnotesize' =>
+          { Type => 'local' },
+);
+
+==> b1404.par <==
+--add-trailing-commas
+--noadd-whitespace
+--continuation-indentation=6
+--delete-trailing-commas
+--extended-continuation-indentation
+--keep-old-breakpoints-before='Q'
+--maximum-line-length=47
+--want-trailing-commas='i'
+
+==> b1408.in <==
+          $registry->add_type_constraint(
+                    Moose::Meta::TypeConstraint::Parameterizable->new(
+                              parent =>
+                                Moose::Util::TypeConstraints::find_type_constraint(
+                                        'Ref' ),
+                              constraint_generator => sub {
+
+                                        return sub {
+                                                  foreach my $x ( @$_ ) {
+                                                            ( $check->( $x ) )
+                                                              || return;
+                                                  }
+                                        }
+                              }, ) );
+
+          $registry->add_type_constraint(
+              Moose::Meta::TypeConstraint::Parameterizable->new(
+                   parent =>
+                     Moose::Util::TypeConstraints::find_type_constraint( 'Ref' ),
+                   constraint_generator => sub {
+
+                             return sub {
+                                       foreach my $x ( @$_ ) {
+                                                 ( $check->( $x ) ) || return;
+                                       }
+                             }
+                   }, ) );
+
+
+==> b1408.par <==
+--indent-columns=10
+--maximum-line-length=87
+--paren-tightness=0
+--extended-line-up-parentheses
+--vertical-tightness-closing=2
+
+==> b1409.in <==
+      local(
+            %cached_env_img,%id_map,
+            %symbolic_labels,%latex_labels
+      )if($FIXEDDIR&&$NO_SUBDIR);
+
+      local(%cached_env_img,%id_map,%symbolic_labels,
+            %latex_labels,)
+        if($FIXEDDIR&&$NO_SUBDIR);
+
+==> b1409.par <==
+--add-trailing-commas
+--delete-trailing-commas
+--want-trailing-commas='b'
+--indent-columns=6
+--maximum-line-length=66
+--noadd-whitespace
+
+==> b1410.in <==
+my $line = join( LD_X, map { LD_H x ( $_ + 2 ) } @$widths );
+
+my $line = join( LD_X, map { LD_H x( $_ + 2 ) } @$widths );
+
+==> b1410.par <==
+# (no params)
+
+==> b1413.in <==
+    &PDL::_conv2d_int(
+        $a, $kern, $c,
+        (  !(  defined $opt
+               && exists $$opt{Boundary} )
+        ) ? 0 : (
+            ( $$opt{Boundary} eq "Reflect"
+            ) + 2 * ( $$opt{Boundary} eq "Truncate" )
+        )
+    );
+
+    &PDL::_conv2d_int(
+        $a, $kern, $c,
+        (
+           !(  defined $opt
+               && exists $$opt{Boundary} )
+        ) ? 0 : (
+            ( $$opt{Boundary} eq "Reflect"
+            ) + 2 * ( $$opt{Boundary} eq "Truncate" )
+        )
+    );
+
+==> b1413.par <==
+--delete-old-whitespace
+--keep-old-breakpoints-before=') &&'
+--line-up-parentheses
+--variable-maximum-line-length
+--vertical-tightness=2
+--weld-nested-containers
+
+==> b1415.in <==
+if (
+     ioctl( STDERR, $TIOCGWINSZ,
+            $winsize )
+  )
+{
+    ...;
+}
+
+if ( ioctl( STDERR, $TIOCGWINSZ,
+            $winsize )
+  )
+{
+    ...;
+}
+
+==> b1415.par <==
+--extended-line-up-parentheses
+--maximum-line-length=39
+--paren-vertical-tightness=2
+--weld-nested-containers
+
+==> b1419.in <==
+    print (
+        Tr( td( { -class => "forumTitle" },
+                $info{"name"} )
+        ),
+
+    );
+
+    print (
+        Tr(
+            td( { -class => "forumTitle" },
+                $info{"name"} )
+        ),
+
+    ) ;
+
+==> b1419.par <==
+--vertical-tightness=2
+--weld-nested-containers
+--break-at-old-comma-breakpoints
+--indent-columns=5
+--vertical-tightness-closing=1
+
+==> b1421.in <==
+if ( L2hos
+     ->Link(
+      $image2, $image1,
+     ) )
+{
+L2hos
+  ->Unlink($tmp);
+}
+
+if (
+     L2hos
+     ->Link(
+      $image2, $image1,
+     ) )
+{
+L2hos
+  ->Unlink($tmp);
+}
+
+==> b1421.par <==
+--break-at-old-method-breakpoints
+--extended-line-up-parentheses
+--indent-columns=0
+--maximum-line-length=23
+--paren-vertical-tightness-closing=1
+--paren-vertical-tightness=1
+--weld-nested-containers
+
+==> b1422.in <==
+    $_ = (
+        $INFO && $INFO =~ /^\d+$/
+        ? join(
+            '',
+            $close_all,
+"<STRONG>$t_title</STRONG><P>\nThis document was generated using the\n",
+"<A HREF=\"$TEX2HTMLADDRESS\"><STRONG>LaTeX</STRONG>2<tt>HTML</tt></A>",
+            " translator Version $TEX2HTMLVERSION\n",
+            "<P>Copyright &#169; 1993, 1994, 1995, 1996,\n"
+            , "<A HREF=\"$AUTHORADDRESS\">Nikos Drakos</A>, \n"
+            , "Computer Based Learning Unit, University of Leeds.\n"
+            , "<BR>Copyright &#169; 1997, 1998, 1999,\n"
+            , "<A HREF=\"$AUTHORADDRESS2\">Ross Moore</A>, \n"
+            , "Mathematics Department, Macquarie University, Sydney.\n"
+            , "<P>The command line arguments were: <BR>\n "
+            , "<STRONG>latex2html</STRONG> <TT>$argv</TT>\n"
+            ,
+            (
+                ( $SHOW_INIT_FILE && ( $INIT_FILE ne '' ) )
+                ? "\n<P>with initialization from: <TT>$INIT_FILE</TT>\n$init_file_mark\n"
+                : ''
+            ),
+"<P>The translation was initiated by $address_data[0] on $address_data[1]",
+            $open_all,
+            $_,
+          )
+        : join(
+            '',
+            $close_all,
+            "$INFO\n",
+            $open_all,
+            $_,
+        )
+    );
+
+
+==> b1422.par <==
+--keep-old-breakpoints-after=','
+
+==> b1423.in <==
+                if ( L2hos
+                     ->Link( $image2,
+                             $image1,
+                     )
+                  )
+                {
+                    L2hos
+                      ->Unlink($tmp);
+                }
+
+                if (
+                     L2hos
+                     ->Link( $image2,
+                             $image1,
+                     )
+                  )
+                {
+                    L2hos
+                      ->Unlink($tmp);
+                }
+
+
+==> b1423.par <==
+--break-at-old-comma-breakpoints
+--break-at-old-method-breakpoints
+--extended-line-up-parentheses
+--paren-vertical-tightness=1
+--weld-nested-containers
+
+==> b1424.in <==
+$registry->add_type_constraint( Moose::Meta::TypeConstraint::Parameterizable
+                                  ->new( $a = 1;
+                                         $b = 1;
+
+                                  ) );
+
+$registry->add_type_constraint(
+                                Moose::Meta::TypeConstraint::Parameterizable
+                                  ->new( $a = 1;
+                                         $b = 1;
+
+                                  ) );
+
+
+==> b1424.par <==
+--extended-line-up-parentheses
+--indent-columns=8
+--keep-old-breakpoints-after='q >= - w ; <> ** & ? !='
+--stack-closing-paren
+--vertical-tightness=1
+--weld-nested-containers
+
+==> b1425.in <==
+my$sem=sub
+{
+    my$code=shift;
+  }
+  ->(sub
+     {
+         IPC::Semaphore->new(IPC_PRIVATE,$nsem,
+                           S_IRWXU|S_IRWXG|S_IRWXO|IPC_CREAT);
+     } );
+
+my$sem=sub
+{
+    my$code=shift;
+  }
+  ->(
+     sub
+     {
+         IPC::Semaphore->new(IPC_PRIVATE,$nsem,
+                           S_IRWXU|S_IRWXG|S_IRWXO|IPC_CREAT);
+     } );
+
+
+==> b1425.par <==
+--noadd-whitespace
+--delete-old-whitespace
+--extended-line-up-parentheses
+--ignore-old-breakpoints
+--maximum-line-length=51
+--opening-anonymous-sub-brace-on-new-line
+--paren-vertical-tightness-closing=2
+--paren-vertical-tightness=1
+--variable-maximum-line-length
+--weld-nested-containers
+
+==> b1426.in <==
+        return$self->_mutate($label,$newseq,
+                             $length);
+
+        return
+          $self->_mutate($label,$newseq,$length,);
+
+==> b1426.par <==
+--add-trailing-commas
+--noadd-whitespace
+--delete-trailing-commas
+--ignore-old-breakpoints
+--line-up-parentheses
+--maximum-line-length=44
+--variable-maximum-line-length
+--want-trailing-commas='m'
+
+==> b1427.in <==
+print join( "\n",
+          @intersection, ),
+  "\n";
+
+print join( "\n",
+            @intersection
+  ),
+  "\n";
+
+==> b1427.par <==
+--add-trailing-commas
+--delete-trailing-commas
+--extended-line-up-parentheses
+--indent-columns=0
+--maximum-fields-per-table=80
+--maximum-line-length=27
+--want-trailing-commas='b'
+
+==> b1428.in <==
+         is(
+              grep ( { $_->{branchcode} eq 'MYLIBRARY' and $_->{selected} == 1 }
+                      @$libraries ),
+              1,
+              'Without selected parameter, my library should be preselected',
+         );
+
+         is(
+                  grep (
+                           {              $_->{branchcode} eq 'MYLIBRARY'
+                                      and $_->{selected} == 1 } @$libraries ),
+                  1,
+'Without selected parameter, my library should be preselected',
+         );
+
+==> b1428.par <==
+--extended-line-up-parentheses
+--indent-columns=9
+
+==> b1430.in <==
+         $t->post_ok(
+                  "//$auth_userid:$password@/api/v1/advanced_editor/macros" =>
+                          json => $macro_values )->status_is(400)->json_is(
+                  '/errors' => [ {
+                           message => "Read-only.",
+                           path    => "/body/macro_id",
+                  } ]
+                          );
+
+         $t->post_ok(
+                  "//$auth_userid:$password@/api/v1/advanced_editor/macros" =>
+                          json => $macro_values )->status_is(400)
+                 ->json_is( '/errors' =>
+                 [ { message => "Read-only.", path => "/body/macro_id", } ] );
+
+
+==> b1430.par <==
+--continuation-indentation=8
+--ignore-old-breakpoints
+--indent-columns=9
+--weld-fat-comma
+--weld-nested-containers
+
+==> b1431.in <==
+            C4::Circulation::AddRenewal(
+                             $issue->{
+                                'borrowernumber'},    # borrowernumber
+                             $item->itemnumber,
+                             undef, undef,
+                             $circ->{'date'},
+            ) unless ($DEBUG);
+
+            C4::Circulation::AddRenewal(
+                             $issue->{'borrowernumber'}, # borrowernumber
+                             $item->itemnumber,
+                             undef, undef,
+                             $circ->{'date'},
+            ) unless ($DEBUG);
+
+==> b1431.par <==
+--continuation-indentation=9
+--extended-line-up-parentheses
+--ignore-side-comment-lengths
+--maximum-line-length=42
+--variable-maximum-line-length
+
+==> b1432.in <==
+$last = after ( 7,
+              sub { print "not ok 3\n"; }, );
+
+$last = after (
+                7,
+                sub { print "not ok 3\n"; },
+);
+
+
+==> b1432.par <==
+--add-trailing-commas
+--continuation-indentation=8
+--delete-trailing-commas
+--extended-continuation-indentation
+--ignore-old-breakpoints
+--indent-columns=8
+--line-up-parentheses
+--maximum-line-length=45
+--space-function-paren
+--want-trailing-commas='b'
+
+==> b1433.in <==
+    return (
+        ( $val || !exists $opts{$opt} ) ?
+          do { $opts{$opt} = 1 } :
+          do { delete $opts{$opt}; 1 }
+      );
+
+    return (
+        ( $val || !exists $opts{$opt} ) ? do { $opts{$opt} = 1 }
+        :
+          do { delete $opts{$opt}; 1 }
+    );
+
+==> b1433.par <==
+--break-after-all-operators
+--keep-old-breakpoints-after=':'
+--variable-maximum-line-length
+
+==> b1435.in <==
+(-r _)?do{do$vshnurc;&err($@)}
+       :
+       &err(
+    "Cannot read $vshnurc")
+       if-f$vshnurc;
+
+(-r _)?
+       do{do$vshnurc;&err($@)}:
+       &err(
+    "Cannot read $vshnurc")
+       if-f$vshnurc;
+
+
+==> b1435.par <==
+--noadd-whitespace
+--break-after-all-operators
+--continuation-indentation=7
+--keep-old-breakpoints-after=':'
+--maximum-line-length=34
+
+==> b1436.in <==
+    if (
+           $included{'gold'}
+        && $yes_andor =~ /any/
+        && $not_andor !~ /all/
+        && (
+            grep ( { $included{$_} } @COLORS ) +
+            grep ( { $excluded{$_} } @COLORS ) ) == 5
+            )
+    {
+    }
+
+    if (
+           $included{'gold'}
+        && $yes_andor =~ /any/
+        && $not_andor !~ /all/
+        && (  grep ( { $included{$_} } @COLORS )
+            + grep ( { $excluded{$_} } @COLORS ) ) == 5
+            )
+    {
+    }
+
+==> b1436.par <==
+--continuation-indentation=8
+--extended-continuation-indentation
+--keep-old-breakpoints-after='+'
+--variable-maximum-line-length
+--want-break-before='+'
+
+==> b1439.in <==
+                $pt +=
+                  ( 0.1734 - 0.000393 * $t ) * dsin($m) +
+                  0.0021 * dsin( 2 * $m )
+                  - 0.4068 * dsin($mprime) +
+                  0.0161 * dsin( 2 * $mprime )
+                  - 0.0004 * dsin( 3 * $mprime ) +
+                  0.0104 * dsin( 2 * $f )
+                  - 0.0051 * dsin( $m + $mprime )
+                  - 0.0074 * dsin( $m - $mprime ) +
+                  0.0004 * dsin( 2 * $f + $m )
+                  - 0.0004 * dsin( 2 * $f - $m )
+                  - 0.0006 * dsin( 2 * $f + $mprime ) +
+                  0.0010 * dsin( 2 * $f - $mprime ) +
+                  0.0005 * dsin( $m + 2 * $mprime );
+
+                $pt +=
+                  ( 0.1734 - 0.000393 * $t ) * dsin($m) +
+                  0.0021 * dsin( 2 * $m ) -
+                  0.4068 * dsin($mprime) +
+                  0.0161 * dsin( 2 * $mprime ) -
+                  0.0004 * dsin( 3 * $mprime ) +
+                  0.0104 * dsin( 2 * $f ) -
+                  0.0051 * dsin( $m + $mprime )
+                  - 0.0074 * dsin( $m - $mprime ) +
+                  0.0004 * dsin( 2 * $f + $m ) -
+                  0.0004 * dsin( 2 * $f - $m )
+                  - 0.0006 * dsin( 2 * $f + $mprime ) +
+                  0.0010 * dsin( 2 * $f - $mprime ) +
+                  0.0005 * dsin( $m + 2 * $mprime );
+
+==> b1439.par <==
+--keep-old-breakpoints-after='-'
+--want-break-before='-'
+
+==> b1440.in <==
+        $comp = ( $form->[3] ? (
+                $im3->dummy( 0, 3 ) > 0 ) *
+                  255 :
+                  ( $im3 > 0 ) );
+
+        $comp =
+              ( $form->[3] ?
+                  (
+                $im3->dummy( 0, 3 ) > 0 ) *
+                  255 :
+                  ( $im3 > 0 ) );
+
+==> b1440.par <==
+--break-after-all-operators
+--continuation-indentation=6
+--keep-old-breakpoints-after='?'
+--maximum-line-length=29
+--opening-paren-right
+--variable-maximum-line-length
+
+==> b1441.in <==
+    my $my_handler =
+       new XML::Handler::YAWriter (
+                                  'Output' => $fileHandler,
+
+       );
+
+    my $my_handler =
+       new XML::Handler::YAWriter ( 'Output' => $fileHandler,
+
+       );
+
+
+==> b1441.par <==
+--continuation-indentation=3
+--extended-line-up-parentheses
+--maximum-line-length=61
+--paren-vertical-tightness=1
+--space-function-paren
+
+==> b1442.in <==
+                $tmpstr =
+                  sprintf ( $self->jump_to_selected_sformat(),
+                    $_, );
+
+                $tmpstr =
+                  sprintf( $self->jump_to_selected_sformat(),
+                    $_ );
+
+==> b1442.par <==
+--add-trailing-commas
+--delete-trailing-commas
+--maximum-line-length=66
+--want-trailing-commas='b'
+--space-keyword-paren
+
+==> b1443.in <==
+        @matches = map {
+            $pk = $_ . '::';
+            grep ( /^\w+$/ && (
+                    $sym = "${pk}$_",
+                    defined *$sym{CODE}
+
+                ),
+                keys %$pk );
+        } _search_ISA($pkg);
+
+        @matches = map {
+            $pk = $_ . '::';
+            grep ( /^\w+$/ && (
+                    $sym = "${pk}$_", defined *$sym{CODE},
+
+                ),
+                keys %$pk );
+        } _search_ISA($pkg);
+
+
+==> b1443.par <==
+--add-trailing-commas
+--delete-trailing-commas
+--ignore-old-breakpoints
+--want-trailing-commas='i'
+
+==> b1444.in <==
+                  while ( my ( $k, $v )
+                           = each %{ $self->{channels}->{$chk}->{device_cache}
+                           } )
+                  {
+                           ...;
+                  }
+
+                  while (  my ( $k, $v )
+                           = each %{$self->{channels}->{$chk}->{device_cache} }
+                         )
+                  {
+                           ...;
+                  }
+
+
+==> b1444.par <==
+--brace-vertical-tightness-closing=1
+--break-before-all-operators
+--continuation-indentation=7
+--extended-continuation-indentation
+--extended-line-up-parentheses
+--indent-columns=9
+--maximum-line-length=79
+--space-keyword-paren
+--vertical-tightness=1
+
+==> b1445.in <==
+         $cfg
+                  ->
+                  {
+                  $type
+                  }
+                  [$num
+                  ]
+                  or
+                  die
+"Unrecognized $type number: $num\n";
+
+         $cfg->{
+                  $type
+                  }
+                  [$num
+                  ]
+                  or
+                  die
+"Unrecognized $type number: $num\n";
+
+==> b1445.par <==
+--continuation-indentation=9
+--indent-columns=9
+--keep-old-breakpoints-after='->'
+--maximum-line-length=20
+--opening-hash-brace-right
+
+==> b1446.in <==
+     serverprint($d,
+                 &X::newxCreateGlyphCursorReq(
+                                             $cursor=&next_resource_id,
+                                             $c,# sourcefont
+                                             $c,# maskfont
+                                             $ch,# sourcechar
+                                             $ch+1,# maskchar
+                                             $fr,$fg,$fb,
+                                             $br,$bg,$bb
+                 )
+     );
+
+     serverprint(
+         $d,
+         &X::newxCreateGlyphCursorReq($cursor=&next_resource_id,
+                                      $c,# sourcefont
+                                      $c,# maskfont
+                                      $ch,# sourcechar
+                                      $ch+1,# maskchar
+                                      $fr,$fg,$fb,
+                                      $br,$bg,$bb
+         )
+     );
+
+==> b1446.par <==
+--noadd-whitespace
+--delete-old-whitespace
+--extended-line-up-parentheses
+--indent-columns=5
+--maximum-line-length=56
+--variable-maximum-line-length
+--vertical-tightness=2
+
+==> b1447.in <==
+    ok(defined($seqio=
+                  $gb->get_Stream_by_batch([qw(J00522 AF303112
+                 2981014)])));
+
+    ok(defined($seqio=
+                  $gb->get_Stream_by_batch(
+                                           [qw(J00522 AF303112
+                 2981014)])));
+
+==> b1447.par <==
+# note that notrim-qw converts the quote type from 'q' to 'Q'
+--noadd-whitespace
+--delete-old-whitespace
+--extended-line-up-parentheses
+--stack-opening-square-bracket
+--notrim-qw
+--vertical-tightness-closing=1
+--vertical-tightness=2
+--weld-nested-containers
+
+==> b1448.in <==
+       $save_check =
+                $menu_frame->Checkbutton(
+                                          -variable => \$root->{'modified'},
+                                          ( $os ne 'win' ? ( -selectcolor => "red" ) : () ),
+                                          -highlightthickness => 0,
+                                          -padx               => 0,
+                                          -pady               => 0,
+
+                                          #-font => "times 5",
+                );
+
+       $save_check =
+                $menu_frame->Checkbutton(
+                            -variable => \$root->{'modified'},
+                            (
+                               $os ne 'win' ? ( -selectcolor => "red" ) : ()
+                            ),
+                            -highlightthickness => 0,
+                            -padx               => 0,
+                            -pady               => 0,
+
+                            #-font => "times 5",
+                );
+
+
+==> b1448.par <==
+--continuation-indentation=9
+--extended-line-up-parentheses
+--indent-columns=7
+--paren-vertical-tightness-closing=1
+
+==> b1449.in <==
+    return wantarray
+      ? map $_->(),
+      @data
+      : ( defined(wantarray) ? sub { $_[0] } : sub { print $_[0] } )
+      ->( join( "\n", map $_->(), @data ) . "\n" );
+
+    return wantarray
+      ? map $_->(), @data
+      : ( defined(wantarray) ? sub { $_[0] } : sub { print $_[0] } )
+      ->( join( "\n", map $_->(), @data ) . "\n" );
+
+
+==> b1449.par <==
+--nobreak-at-old-ternary-breakpoints
+
+==> b1450.in <==
+                    if (      $x
+                              || (      ($self->allele_ori eq 'g')
+                                        && (      substr($self->dnStreamSeq, -1, 1,) eq
+                                                  'c')))
+                    {
+                              return 1;
+                    }
+
+                    if (      $x
+                              || (      ($self->allele_ori eq 'g')
+                                        && (
+                                                  substr(   $self->dnStreamSeq, -1,
+                                                            1,) eq 'c')))
+                    {
+                              return 1;
+                    }
+
+==> b1450.par <==
+--break-before-paren-and-indent=2
+--break-before-paren=2
+--continuation-indentation=9
+--extended-continuation-indentation
+--indent-columns=10
+--maximum-line-length=97
+--paren-tightness=2
+--paren-vertical-tightness-closing=2
+--paren-vertical-tightness=1
+
+==> b1451.in <==
+my %distance_pref =
+     (
+        meter => 1.1,
+        inch  => 0.7,
+        foot  => 0.9,
+        yard  => 0,
+        mile  => 1.0
+     );
+
+my %distance_pref =
+        ( meter => 1.1, inch => 0.7, foot => 0.9, yard => 0, mile => 1.0, );
+
+
+==> b1451.par <==
+--add-trailing-commas
+--break-before-paren-and-indent=2
+--break-before-paren=1
+--comma-arrow-breakpoints=3
+--continuation-indentation=5
+--delete-trailing-commas
+--indent-columns=8
+--want-trailing-commas='m'
+
+==> b1453.in <==
+my $foo =decode_json ( {
+      foo => 'bar' } );
+
+my $foo
+          =decode_json ( {
+               foo => 'bar'
+               } );
+
+==> b1453.par <==
+--variable-maximum-line-length
+--weld-nested-containers
+--continuation-indentation=10
+--maximum-line-length=24
+--indent-columns=3
+--stack-opening-hash-brace
+--vertical-tightness-closing=1
+--vertical-tightness=0
+--extended-line-up-parentheses
+# These cancel each other:
+#--nowant-right-space='='
+#--space-function-paren
+
+==> b1454.in <==
+my $red_color =
+      $widget->window->get_colormap->color_alloc(
+                                                  {
+                                                    red   => 65000,
+                                                    green => 0,
+                                                    blue  => 0
+                                                  }
+      );
+
+my $red_color = $widget->window->get_colormap->color_alloc( {
+                                                         red => 65000,
+                                                         green => 0,
+                                                         blue  => 0
+} );
+
+==> b1454.par <==
+--continuation-indentation=6
+--extended-line-up-parentheses
+--maximum-line-length=66
+--variable-maximum-line-length
+--weld-nested-containers
+
+==> b1455.in <==
+if ($BOLD_MATH) {
+    (
+       $labels, $comment,
+       join( '',
+                 '<B>', &make_math ( $mode, '', '', $_ ),
+                 '</B>', ),
+    )
+}
+
+if ($BOLD_MATH) {
+    (
+       $labels, $comment,
+       join(
+                 '', '<B>', &make_math ( $mode, '', '', $_ ),
+                 '</B>'
+       ),
+    )
+}
+
+==> b1455.par <==
+--add-trailing-commas
+--continuation-indentation=8
+--delete-trailing-commas
+--extended-continuation-indentation
+--line-up-parentheses
+--maximum-line-length=66
+--space-function-paren
+--want-trailing-commas='b'
+
+==> b1456.in <==
+                    $resources->{$group_id} =
+                      {
+                         id => $group_id, ident => $group_ident,
+                         firstname   => $user->{firstname},
+                         lastname    => $user->{lastname},
+                         email       => $user->{email},
+                         timezone_id => $user->{timezone_id},
+                         name        => $user->{firstname} .
+                           " " .
+                           $user->{lastname}, selected => '0'
+                      };
+
+                    $resources->{$group_id} =
+                      {
+                         id => $group_id, ident => $group_ident,
+                         firstname   => $user->{firstname},
+                         lastname    => $user->{lastname},
+                         email       => $user->{email},
+                         timezone_id => $user->{timezone_id},
+                         name        => $user->{firstname} .
+                           " " . $user->{lastname}, selected => '0',
+                      };
+
+==> b1456.par <==
+--add-trailing-commas
+--break-after-all-operators
+--break-at-old-comma-breakpoints
+--delete-trailing-commas
+--indent-columns=5
+--keep-old-breakpoints-after='Z <<>> += : b = -- ] //= {'
+--maximum-line-length=71
+--short-concatenation-item-length=1
+--want-trailing-commas='h'
+
+==> b1457.in <==
+BEGIN {
+         %messages=(
+                  0x95 => [
+                           StartSessionTransmission =>
+                                    qw( *_RemoteIPAddr V_SessionType )
+                  ],
+                  0x93 => [
+                             ConfigStat =>qw( Z16_DeviceName V_StationUserID
+                             V_StationUserInstance
+                             Z16_UserName Z16_ServerName
+                             V_NumberLines V_NumberSpeedDials )
+                  ],
+         ) ;
+}
+
+BEGIN {
+         %messages=(
+                  0x95 => [
+                           StartSessionTransmission =>
+                                    qw( *_RemoteIPAddr V_SessionType )
+                  ],
+                  0x93 => [
+                           ConfigStat =>
+                                    qw( Z16_DeviceName V_StationUserID
+                                    V_StationUserInstance
+                                    Z16_UserName Z16_ServerName
+                                    V_NumberLines V_NumberSpeedDials )
+                  ],
+         ) ;
+}
+
+
+==> b1457.par <==
+--maximum-line-length=76
+--indent-columns=9
+--continuation-indentation=9
+--noadd-whitespace
+--extended-continuation-indentation
+--extended-line-up-parentheses
+
+==> b1458.in <==
+     join( '',
+          grep { defined }
+           @{ $me->{'mail_hdr_list'} }
+     );
+
+     join( '',
+          grep { defined }
+           @{ $me->{'mail_hdr_list'}
+           }, );
+
+==> b1458.par <==
+--maximum-line-length=38
+--indent-columns=5
+--continuation-indentation=1
+--add-trailing-commas
+--want-trailing-commas='b'
+--delete-trailing-commas
+
+==> b1459.in <==
+# S1
+my @pics=
+ grep( -f "$dir/$_"
+   &&-s "$dir/$_"
+   &&!
+   -f "$dir/$_$NO_ALBUM"
+   &&!/\Q$NOT_IMG\E$/
+   &&!/\Q$NO_ALBUM\E$/
+   &&!/\.txt$/
+   &&!/\.htaccess$/
+   &&!/~$/
+   &&$_ ne
+   "$opt->{'index'}$HTML"
+   &&$_ ne $HEADER
+   &&$_ ne $FOOTER
+   &&
+
+   $_ ne$opt->{
+     'captions'},
+  @dir ) ;
+
+#S2
+my @pics=
+ grep( -f "$dir/$_"
+    &&-s "$dir/$_"
+    &&!
+    -f "$dir/$_$NO_ALBUM"
+    &&!/\Q$NOT_IMG\E$/
+    &&!/\Q$NO_ALBUM\E$/
+    &&!/\.txt$/
+    &&!/\.htaccess$/
+    &&!/~$/
+    &&$_ ne
+"$opt->{'index'}$HTML"
+    &&$_ ne $HEADER
+    &&$_ ne $FOOTER
+    &&
+
+    $_ ne
+    $opt->{'captions'},
+   @dir ) ;
+
+
+==> b1459.par <==
+--maximum-line-length=25
+--indent-columns=3
+--continuation-indentation=1
+--noadd-whitespace
+--extended-continuation-indentation
+--extended-line-up-parentheses
 
 ==> b146.in <==
 # State 1
@@ -9989,6 +11790,406 @@ sub bubba {
 --vertical-tightness=2
 --weld-nested-containers
 
+==> b1460.in <==
+# S1;
+  diag "Connected to "
+        . inet_ntoa (( unpack_sockaddr_in (
+                            getpeername (T)
+                     ) )[1] ) . "\n" ;
+
+# S2
+  diag "Connected to "
+        . inet_ntoa (
+                      (unpack_sockaddr_in (
+                            getpeername (T)
+                       )
+                      )[1] ) . "\n" ;
+
+
+==> b1460.par <==
+--continuation-indentation=6
+--extended-line-up-parentheses
+--indent-columns=1
+--maximum-line-length=43
+--space-function-paren
+--stack-closing-paren
+--stack-opening-paren
+--vertical-tightness=2
+--weld-nested-containers
+
+==> b1461.in <==
+        $C_sigmas = sub { [
+            $a3::COMMON, $a3::Offset{lcount} + 47 ] };
+
+        $C_sigmas = sub
+        { [ $a3::COMMON, $a3::Offset{lcount} + 47 ] };
+
+==> b1461.par <==
+--maximum-line-length=68
+--continuation-indentation=9
+--weld-nested-containers
+--want-break-before='='
+--opening-anonymous-sub-brace-on-new-line
+
+==> b1462.in <==
+die sprintf(
+      "Usage: %s [ -r | -a | -f fmt ] file ...\n",
+      (
+        $0=~
+          m|.*/(.*)|o
+      ),
+
+);
+
+die sprintf(
+     "Usage: %s [ -r | -a | -f fmt ] file ...\n",(
+       $0=~
+         m|.*/(.*)|o
+     ),
+
+);
+
+==> b1462.par <==
+--maximum-line-length=50
+--indent-columns=7
+--noadd-whitespace
+--extended-line-up-parentheses
+--delete-old-whitespace
+--opening-paren-right
+
+==> b1463.in <==
+die sprintf(
+    "Usage: %s [ -r | -a | -f fmt ] file ...\n",
+    (
+        $0 =~
+          m|.*/(.*)|o
+    ),
+
+);
+
+die sprintf(
+    "Usage: %s [ -r | -a | -f fmt ] file ...\n", (
+       $0 =~
+         m|.*/(.*)|o
+    ),
+
+);
+
+==> b1463.par <==
+--maximum-line-length=50
+--extended-line-up-parentheses
+--delete-old-whitespace
+--opening-paren-right
+
+==> b1464.in <==
+while (
+    $^O !~ /Win32/ and
+
+    my $pid = fork()
+) {
+    my $status = waitpid $pid, 0;
+    warn "Server restarting in $config->{delay} seconds";
+    sleep $config->{delay};
+}
+
+==> b1464.par <==
+--opening-brace-always-on-right
+--keep-old-blank-lines=0
+--break-after-all-operators
+--keyword-group-blanks-size='2.8'
+--keyword-group-blanks-before=2
+
+==> b1465.in <==
+# See initialize_lp_*
+
+my @pics =
+         grep ( -f "$dir/$_"
+                  && -s "$dir/$_"
+                  &&              # Not zero byte file
+                  !-f "$dir/$_$NO_ALBUM"
+                  &&              # Don't show these
+                  !/\Q$NOT_IMG\E$/
+                  &&              # The not_img files themselves
+                  !/\Q$NO_ALBUM\E$/
+                  &&              # The not_img files themselves
+                  !/\.txt$/ &&    # Per image captions
+                  !/\.htaccess$/
+                  &&              # httpd security files
+                  !/~$/ &&        # Emacs backup files
+                  $_ ne
+"$opt->{'index'}$HTML"
+                  &&                 # Index html
+                  $_ ne $HEADER &&   # Header/footer
+                  $_ ne $FOOTER
+                  && $_ ne
+                  $opt->{'captions'}
+         ,                           # Captions file
+         @dir );
+
+
+==> b1465.par <==
+--maximum-line-length=29
+--indent-columns=9
+--continuation-indentation=9
+--variable-maximum-line-length
+--extended-line-up-parentheses
+--ignore-side-comment-lengths
+
+==> b1466.in <==
+sub new{
+     my($self)=$class->SUPER::new(
+          yyrules=>[
+               ['$start',2,undef,],
+               [
+                    'item',
+                    3,
+                    sub{
+                         if($_[3]){
+                              my($k,$v,);
+                              while(($k,$v,)=each(%{$_[3]})){
+                                   if($k eq"email_"){
+                                        if(
+                                                   defined$groups{$_[1]}
+                                                   ->{"email_work"})
+                                        {
+                                             $k="email_home";
+                                        }
+                                        else{
+                                             $k="email_work";
+                                        }
+                                   }
+
+                                   $groups{$_[1]}->{$k}=$v;
+                              }
+                         }
+                    },
+               ],
+               [
+                        '@1-3',
+                        0,
+                        sub{parse_value($_[2]->{ENCODING});},
+               ],
+               ['params',0,sub{{}},],
+               [
+                        'params',
+                        3,
+                        sub{
+                             my%hash;
+                             for(my$i=0;$i<@{$_[3]};$i+=2){
+                                  push@{$hash{$_[3]->[$i]}},$_[3]->[$i+1];
+                             }
+                             \%hash;
+                        },
+               ],
+               [
+                        'paramlist',
+                        1,
+                        sub{$_[1]},
+               ],
+               [
+                        'paramlist',
+                        5,
+                        sub{
+                             unshift(@{$_[1]},@{$_[5]},)if defined$_[5];
+                             $_[1];
+                        },
+               ],
+               [
+                        'param',
+                        5,
+                        sub{[uc($_[1]),uc($_[5]),]},
+               ],
+               ['addressparts',1,sub{{"address",$_[1],}},],
+               [
+                        'addressparts',
+                        3,
+                        sub{{"address",$_[1],"address2",$_[3],}},
+               ],
+               [
+                        'addressparts',
+                        5,
+                        sub{{"address",$_[1],"address2",$_[3],"street",$_[5],}},
+               ],
+          ],
+          @_,
+     );
+     bless($self,$class,);
+
+}
+
+==> b1466.par <==
+--indent-columns=5
+--continuation-indentation=7
+--weld-nested-containers
+--noadd-whitespace
+--extended-continuation-indentation
+--extended-line-up-parentheses
+
+==> b1467.in <==
+      my $self = [
+            {     receive  => 1,
+                  transmit => 2,
+            }] ;
+
+      my $self
+        = [
+            { receive => 1, transmit => 2, }
+        ] ;
+
+==> b1467.par <==
+--maximum-line-length=44
+--indent-columns=6
+--want-break-before='='
+--square-bracket-vertical-tightness-closing=1
+--square-bracket-tightness=2
+--brace-vertical-tightness=1
+
+==> b1468.in <==
+foreach $n (
+     qw( msm ali ) )
+{    foreach $e ( qw(
+          uc16
+          ) )
+     {
+          #
+     }
+}
+
+foreach $n (
+     qw( msm ali ) )
+{
+     foreach $e ( qw(
+          uc16
+     ) )
+     {
+          #
+     }
+}
+
+==> b1468.par <==
+--maximum-line-length=21
+--indent-columns=5
+--weld-nested-containers
+--paren-vertical-tightness-closing=2
+--stack-opening-paren
+--block-brace-vertical-tightness=1
+--nodelete-old-newlines
+
+==> b1469.in <==
+my @outer =
+        (
+         [
+          'a1', 'a2', 'a3',
+         ], [
+          'b1', 'b2', 'b3',
+         ], [
+          'c1', 'c2', 'c3',
+         ],
+        );
+
+my @outer = (
+ [ 'a1', 'a2', 'a3', ],
+ [ 'b1', 'b2', 'b3', ],
+ [ 'c1', 'c2', 'c3', ],
+);
+
+==> b1469.par <==
+--maximum-line-length=35
+--indent-columns=1
+--continuation-indentation=8
+--extended-continuation-indentation
+--break-before-paren=2
+--opening-square-bracket-right
+
+==> b1470.in <==
+         $opt= {
+                  iparse(  { Maxiter => 200, Eps => 1e-4, }, ifhref($opt) )
+         };
+
+         $opt= { iparse( { Maxiter => 200, Eps => 1e-4, },
+                           ifhref($opt) ) };
+
+==> b1470.par <==
+--maximum-line-length=59
+--indent-columns=9
+--line-up-parentheses
+--variable-maximum-line-length
+--extended-continuation-indentation
+--nowant-left-space='='
+
+==> b1471.in <==
+my @global_ops = (
+    { "|" => sub { $_[0] unless $_[1]; } },
+    { "&" => sub { ( $_[0] && $_[1] ) ? $_[0] : 0; }, },
+);
+
+my @global_ops = (
+    { "|" => sub { $_[0] unless $_[1]; }, },
+    { "&" => sub { ( $_[0] && $_[1] ) ? $_[0] : 0; } },
+);
+
+==> b1471.par <==
+--add-trailing-commas
+--want-trailing-commas='*'
+--delete-weld-interfering-commas
+
+==> b1474.in <==
+         $opt = {iparse( {Maxiter => 200, Eps => 1e-4,},
+                           ifhref($opt) )};
+         $opt = {
+                  iparse(  {Maxiter => 200, Eps => 1e-4,}, ifhref($opt) )
+         };
+
+==> b1474.par <==
+--maximum-line-length=59
+--indent-columns=9
+--continuation-indentation=6
+--line-up-parentheses
+--variable-maximum-line-length
+--extended-continuation-indentation
+--brace-tightness=2
+
+==> b1475.in <==
+run_sub (
+         ->$blah{ say "ok 5" ; } ) ;
+
+run_sub ( ->$blah{ say "ok 5" ; }
+) ;
+
+
+==> b1475.par <==
+--maximum-line-length=36
+--extended-continuation-indentation
+--paren-vertical-tightness=2
+--extended-line-up-parentheses
+--space-function-paren
+--space-terminal-semicolon
+--break-at-old-method-breakpoints
+
+==> b1476.in <==
+        $apply->configure(
+            -command => sub
+            {
+                get_button_values_from_panel();
+                execute_decors(0);
+                set_unsaved();
+            }
+        );
+
+        $apply->configure(
+            -command => sub
+            {
+                get_button_values_from_panel();
+                execute_decors(0);
+                set_unsaved();
+            },
+        );
+
+==> b1476.par <==
+--add-trailing-commas
+--want-trailing-commas='h'
+--delete-trailing-commas
+
 ==> b148.in <==
 # state 1
 @yydgoto=(
@@ -10008,6 +12209,447 @@ sub bubba {
 --maximum-line-length=95
 --paren-vertical-tightness-closing=1
 --variable-maximum-line-length
+
+==> b1481.in <==
+$hr
+          ->set_uri_schemes
+          ([
+ 'http','https',
+ undef,'ftp'
+          ]);
+$hr->set_uri_schemes([
+ 'http','https',
+ undef,'ftp'
+] );
+
+
+==> b1481.par <==
+--maximum-line-length=22
+--indent-columns=1
+--continuation-indentation=10
+--weld-nested-containers
+--noadd-whitespace
+--paren-vertical-tightness-closing=1
+--delete-old-whitespace
+--stack-opening-square-bracket
+
+==> b1482.in <==
+@ISA =
+      qw(
+    Net::FTP::I) ;
+
+@ISA =
+      qw(Net::FTP::I
+      ) ;
+
+==> b1482.par <==
+--maximum-line-length=21
+--continuation-indentation=6
+--noadd-whitespace
+--qw-as-function
+--want-break-after='='
+
+==> b1485.in <==
+use
+  UnixODBC qw(
+         :all);
+use
+  UnixODBC qw(
+         :all
+  );
+
+==> b1485.par <==
+--maximum-line-length=15
+--indent-columns=9
+--noadd-whitespace
+--qw-as-function
+
+==> b1487.in <==
+use Net::Domain qw(hostname domainname
+                   hostdomain);
+use Net::Domain qw(
+                    hostname
+                    domainname
+                    hostdomain
+);
+
+==> b1487.par <==
+--maximum-line-length=41
+--continuation-indentation=7
+--line-up-parentheses
+--noadd-whitespace
+--qw-as-function
+
+==> b1488.in <==
+use vars qw(
+             $VERSION @ISA
+             @EXPORT_OK %EXPORT_TAGS
+);
+use vars qw($VERSION @ISA
+            @EXPORT_OK %EXPORT_TAGS);
+
+==> b1488.par <==
+--maximum-line-length=48
+--continuation-indentation=6
+--noadd-whitespace
+--extended-line-up-parentheses
+--qw-as-function
+
+==> b1489.in <==
+    $menuitem_dict->signal_connect (
+        'activate' => sub { create_dict_window () }, );
+    $menuitem_dict->signal_connect ( 'activate' => sub { create_dict_window () }
+    );
+
+==> b1489.par <==
+--space-function-paren
+--add-trailing-commas
+--want-trailing-commas='h'
+--delete-trailing-commas
+
+==> b1490.in <==
+$e_str->bind (
+'<return>' => sub {$e_hnr->tabfocus if $e_hnr->can ( 'tabfocus' );}, );
+$e_str->bind ( '<return>' => sub {$e_hnr->tabfocus if $e_hnr->can ( 'tabfocus' );}
+);
+
+==> b1490.par <==
+--maximum-line-length=82
+--indent-columns=0
+--space-function-paren
+--paren-tightness=0
+--add-trailing-commas
+--want-trailing-commas='h'
+--delete-trailing-commas
+--block-brace-tightness=2
+
+==> b1491.in <==
+@ISA =
+       qw( Stack )
+       ; # inherit from Stack
+@ISA =
+       qw(
+    Stack )
+       ; # inherit from Stack
+
+==> b1491.par <==
+--maximum-line-length=18
+--continuation-indentation=7
+--paren-vertical-tightness-closing=3
+--paren-tightness=0
+--qw-as-function
+--add-trailing-commas
+--want-trailing-commas=1
+
+==> b1492.in <==
+        $col->configure ( -command =>
+              sub { $t->configure ( -background => $color ); } );
+
+        $col->configure(
+            -command => sub { $t->configure(-background => $color); },
+        );
+
+==> b1492.par <==
+--maximum-line-length=58
+--variable-maximum-line-length
+--space-function-paren
+--paren-tightness=2
+--add-trailing-commas
+--want-trailing-commas='h'
+--delete-trailing-commas
+
+==> b1493.in <==
+        $w->bind('<Page_Down>' =>
+              sub { $t1->yview(scroll => 1, 'pages'); },);
+
+        $w->bind(
+            '<Page_Down>' => sub { $t1->yview(scroll => 1, 'pages'); }
+        );
+
+==> b1493.par <==
+--maximum-line-length=58
+--variable-maximum-line-length
+--paren-tightness=2
+--add-trailing-commas
+--want-trailing-commas='h'
+--delete-trailing-commas
+
+==> b1494.in <==
+        $b4->bind('<1>' =>
+              sub { cset('D', 'HilightColorFore', "\$color"); },);
+
+        $b4->bind(
+            '<1>' => sub { cset('D', 'HilightColorFore', "\$color"); }
+        );
+
+==> b1494.par <==
+--maximum-line-length=58
+--variable-maximum-line-length
+--paren-tightness=2
+--add-trailing-commas
+--want-trailing-commas='h'
+--delete-trailing-commas
+
+==> b1495.in <==
+                        $line{amountoutstanding}=
+                           sprintf( "%.2f",
+                                    $accts->[ $i ]
+                                       ->{'amountoutstanding'},);
+
+                        $line{amountoutstanding}=
+                           sprintf( "%.2f",
+                                    $accts->[ $i ]->{'amountoutstanding'}
+                           );
+
+==> b1495.par <==
+--maximum-line-length=73
+--indent-columns=8
+--continuation-indentation=3
+--noadd-whitespace
+--extended-line-up-parentheses
+--add-trailing-commas
+--want-trailing-commas='b'
+--delete-trailing-commas
+
+==> b1495a.in <==
+$line{amountoutstanding} = sprintf( "%.2f",
+         $accts->[$ixx]
+            ->{'amountoutstanding'}, );
+
+$line{amountoutstanding} = sprintf( "%.2f",
+         $accts->[$ixx]->{'amountoutstanding'}
+);
+
+==> b1495a.par <==
+-l=46 -ci=3 -i=9 -wtc=b -atc -dtc
+
+==> b1496.in <==
+my @abc
+     = qw( a b c d e
+     );
+
+my @abc = qw(
+a b c d e );
+
+==> b1496.par <==
+--maximum-line-length=21
+--indent-columns=0
+--continuation-indentation=5
+--line-up-parentheses
+--break-before-all-operators
+--novalign-code
+--break-at-trailing-comma-types='i'
+--qw-as-function
+
+==> b1497.in <==
+    $c->CanvasBind ( '<2>' => [sub { area_down (@_) }, \%pinfo],
+    );
+    $c->CanvasBind (
+        '<2>' => [sub { area_down (@_) }, \%pinfo], );
+
+==> b1497.par <==
+--maximum-line-length=61
+--line-up-parentheses
+--variable-maximum-line-length
+--paren-vertical-tightness=1
+--space-function-paren
+--square-bracket-tightness=2
+--break-at-trailing-comma-types='h'
+--interbracket-arrow-style='}->['
+
+==> b1498.in <==
+    $c->addtag( 'active', 'withtag',
+                ruler_make_tab( $c, $x, $y, $rinfo ), );
+    $c->addtag( 'active', 'withtag',
+                ruler_make_tab( $c, $x, $y, $rinfo ),
+    );
+
+==> b1498.par <==
+--maximum-line-length=61
+--line-up-parentheses
+--break-at-trailing-comma-types='b'
+
+==> b1499.in <==
+    ( $_[ 0 ] < 0 ) ?
+          -1 : (
+        ( $_[ 0 ] >0 ) ? 1 : 0 );
+
+    ( $_[0] < 0 ) ? -1 :
+      (
+        ( $_[0] > 0 ) ? 1 : 0 );
+
+==> b1499.par <==
+--maximum-line-length=25
+--variable-maximum-line-length
+--opening-paren-right
+--break-after-all-operators
+
+==> b1500.in <==
+$config = {
+    delay => 5, ppid => $$,
+};
+$config = {
+    delay => 5,
+    ppid  => $$
+};
+
+==> b1500.par <==
+--comma-arrow-breakpoints=2
+--add-trailing-commas
+--want-trailing-commas='i'
+--delete-trailing-commas
+--keep-old-breakpoints-after='t q .= ^.= .. i x R -> J'
+--break-at-trailing-comma-types='1'
+
+==> b1501.in <==
+my%S3d_url=(
+  'emotif'=>$SGD_stem_url{'s3d'}
+    .'seq_search.pl?db=emotif&gene=',
+  'pfam'=>$SGD_stem_url{'s3d'}.'seq_search.pl?db=pfam&gene=',
+  'pfam_uk'=>$SGD_stem_url{'s3d'}
+    .'seq_search.pl?db=pfam&loc=uk&gene=',
+  'pfam_us'=>$SGD_stem_url{'s3d'}
+    .'seq_search.pl?db=pfam&loc=us&gene=',
+  'blast_nr'=>$SGD_stem_url{'s3d'}.'getblast?db=nr&name=',
+  'blast_est'=>$SGD_stem_url{'s3d'}.'getblast?db=est&name=',
+  'blast_mammal'=>$SGD_stem_url{'s3d'}
+    .'getblast?db=mammal&name=',
+  'blast_human'=>$SGD_stem_url{'s3d'}
+    .'getblast?db=human&name=',
+  'blast_worm'=>$SGD_stem_url{'s3d'}
+    .'getblast?db=worm&name=',
+  'blast_yeast'=>$SGD_stem_url{'s3d'}
+    .'getblast?db=yeast&name=',
+  'blast_worm_yeast'=>$SGD_stem_url{'s3d'}
+    .'getblast?db=worm&query=worm&name=',
+  'patmatch'=>$SGD_stem_url{'s3d2'}.'grepmatch?',##comment
+  'grepmatch'=>$SGD_stem_url{'s3d2'}.'grepmatch?',
+  'pdb_neighbors'=>$SGD_stem_url{'s3d'}
+    .'pdb_neighbors?id=CHAIN&gene=ORF_NAME'
+);
+
+==> b1501.par <==
+--maximum-line-length=61
+--indent-columns=3
+--noadd-whitespace
+--extended-line-up-parentheses
+
+==> b1502.in <==
+my $species =
+        new Bio::Species(
+    -classification =>
+            [ qw(
+        sapiens Homo Hominidae Catarrhini Primates Eutheria
+        Mammalia Vertebrata Chordata Metazoa Eukaryota
+            ) ]
+        );
+
+==> b1502.par <==
+--maximum-line-length=29
+--continuation-indentation=8
+--line-up-parentheses
+--weld-nested-containers
+--stack-opening-paren
+--stack-closing-square-bracket
+
+==> b1503.in <==
+         open
+                  (
+                  MEMINFO
+                  )
+                  ||
+                  die
+"can't open $MEMINFO: $!";
+         open(    MEMINFO
+                  )
+                  ||
+                  die
+"can't open $MEMINFO: $!";
+
+==> b1503.par <==
+--maximum-line-length=15
+--indent-columns=9
+--continuation-indentation=9
+--paren-vertical-tightness=1
+
+==> b1504.in <==
+    my $FH = $self->_fh();
+
+    while (<$FH>) {
+        if ( $_ !~ /\w/ ) { next }
+    }
+
+==> b1504.par <==
+--keyword-group-blanks-size='0'
+--keyword-group-blanks-after=2
+--keep-old-blank-lines-exceptions='bp bc b{ {b'
+
+==> b1507.in <==
+         while(
+                  (
+                           $char=substr(
+                                    $t->{line},
+                                    $t->{line_cursor}+1,1,
+                           )
+                  )=~/[^\W\d_]/
+                  )
+         {
+                  ...;
+         }
+
+         while(
+                  (
+                           $char=substr(
+                                    $t->{line},
+                                    $t->{line_cursor}+1,1,
+                           )
+                  )=~/[^\W\d_]/
+                  )
+         {
+                  ...;
+         }
+
+
+==> b1507.par <==
+--maximum-line-length=74
+--indent-columns=9
+--continuation-indentation=9
+--noadd-whitespace
+--extended-continuation-indentation
+--ignore-old-breakpoints
+--extended-line-up-parentheses
+
+==> b1508.in <==
+open(FIND,
+        "find $fslist $xdev -type f \\( -perm -04000 -o -perm -02000 \\) -print|"
+);
+
+open(FIND,"find $fslist $xdev -type f \\( -perm -04000 -o -perm -02000 \\) -print|",
+);
+
+==> b1508.par <==
+--maximum-line-length=84
+--indent-columns=8
+--noadd-whitespace
+--extended-continuation-indentation
+--break-before-paren=3
+--break-before-paren-and-indent=2
+--add-trailing-commas
+--want-trailing-commas='i'
+--delete-trailing-commas
+--break-at-trailing-comma-types='m'
+
+==> b1509.in <==
+eval {
+    $formatter->parse_from_file ( $file, $out_fh )
+} ;
+eval { $formatter->parse_from_file ( $file, $out_fh ) };
+
+==> b1509.par <==
+--maximum-line-length=55
+--space-function-paren
+--space-terminal-semicolon
+--noadd-semicolons
 
 ==> b156.in <==
 # State 1
@@ -12923,11 +15565,11 @@ has 'baz' => (
 --variable-maximum-line-length
 
 ==> b746.in <==
-# State 1 : 
+# State 1 :
 @eigenvalues= eigenvalue( [
    [ 3, 4 ], [ 4, -3 ] ] );
 
-# State 2 : 
+# State 2 :
 @eigenvalues=
   eigenvalue(
      [
@@ -15748,7 +18390,7 @@ $mult=
           ->[$i])/
   (6*$delta);
 
-# State 2 
+# State 2
 
 $mult=(
         $coeffs->[$i]/
@@ -16516,3 +19158,83 @@ s/^([^\t]*)(\t+)/$1.(" " x ((length($2)<<3)-(length($1)&7)))/e )
 
 ==> c100.par <==
 # default settings
+
+==> c169.in <==
+    eval "format OUT19 = \n" . '@<<<' . "\0\n" . '$v' . "\n" . '@<<<' . "\0\n"
+      . '$v'
+      . "\n.\n";
+
+==> c169.par <==
+# default settings
+
+==> c190.in <==
+        # reverse sweep needs to look at '$saw_level_change' for these cases
+        local($codeA) = "sub wrap_cmd_$cmd {" . "\n"
+            .'local($cmd, $_) = @_; local ($args, $dummy, $pat) = "";'
+            . $bodyA
+            . (($thisone)? "\nprint \"\\nwrap $cmd:\".\$args.\"\\n\";" : '')
+            . "\n".'(&make_deferred_wrapper(1).$cmd.'
+            . "\"$padding\"".'.$args.&make_deferred_wrapper(0),$_)}'
+            . "\n";
+
+        local($codeA) = "sub wrap_cmd_$cmd {" . "\n"
+            .'local($cmd, $_) = @_; local ($args, $dummy, $pat) = "";'
+            . $bodyA
+            . (($thisone)? "\nprint \"\\nwrap $cmd:\".\$args.\"\\n\";" : '')
+            . "\n".'(&make_deferred_wrapper(1).$cmd.'
+            . "\"$padding\"".'.$args.&make_deferred_wrapper(0),$_)}'
+            . "\n";
+
+==> c190.par <==
+-pbp -nst -nse -wn -xci -conv -fso -gcs -maxue=3
+
+==> c302.in <==
+use strict;
+use warnings;
+
+use Params::Validate qw(:all);
+
+use PVTests;
+use Test::More 0.88;
+my $String = 'foo';    # blank after this opens and closes
+
+my $Foo  = bless \$v1, 'Foo';
+my $Bar  = bless \$v2, 'Bar';
+my $Baz  = bless \$v3, 'Baz';
+my $Quux = bless \$v4, 'Quux';
+my $v1;
+my ( $v1, $v2, $v3, $v4 );
+
+
+==> c302.par <==
+--keyword-group-blanks-after=2
+--keyword-group-blanks-before=0
+--keyword-group-blanks-size='1.8'
+
+==> c314.in <==
+  my $map =
+          {
+    dtend =>
+            {                                                                 # 4.8.2.2
+            },
+            } ;
+
+==> c314.par <==
+--noadd-whitespace
+--indent-columns=0
+--line-up-parentheses
+--maximum-line-length=39
+--continuation-indentation=4
+
+==> c400.in <==
+Readonly::Array my @PATTERNS => (  # requires this side comment
+   ['A-Z','a-z','0-9','_']       => ['\\w', '\\W'],
+   ['A-Z','a-z']                 => ['[[:alpha:]]','[[:^alpha:]]'],
+);
+
+==> c400.par <==
+--indent-columns=0
+--continuation-indentation=3
+--extended-line-up-parentheses
+--maximum-line-length=12
+--variable-maximum-line-length

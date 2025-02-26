@@ -1,16 +1,17 @@
 #####################################################################
 #
-# The Perl::Tidy::Logger class writes the .LOG and .ERR files
+# The Perl::Tidy::Logger class writes any .LOG and .ERR files
+# and supplies some basic run information for error handling.
 #
 #####################################################################
 
 package Perl::Tidy::Logger;
 use strict;
 use warnings;
-our $VERSION = '20220613';
+our $VERSION = '20250214.02';
+use Carp;
 use English qw( -no_match_vars );
 
-use constant DEVEL_MODE   => 0;
 use constant EMPTY_STRING => q{};
 use constant SPACE        => q{ };
 
@@ -23,17 +24,17 @@ sub AUTOLOAD {
     return if ( $AUTOLOAD =~ /\bDESTROY$/ );
     my ( $pkg, $fname, $lno ) = caller();
     my $my_package = __PACKAGE__;
-    print STDERR <<EOM;
+    print {*STDERR} <<EOM;
 ======================================================================
 Error detected in package '$my_package', version $VERSION
 Received unexpected AUTOLOAD call for sub '$AUTOLOAD'
-Called from package: '$pkg'  
+Called from package: '$pkg'
 Called from File '$fname'  at line '$lno'
 This error is probably due to a recent programming change
 ======================================================================
 EOM
     exit 1;
-}
+} ## end sub AUTOLOAD
 
 sub DESTROY {
 
@@ -44,7 +45,8 @@ use constant DEFAULT_LOGFILE_GAP => 50;
 
 sub new {
 
-    my ( $class, @args ) = @_;
+    my ( $class, @arglist ) = @_;
+    if ( @arglist % 2 ) { croak "Odd number of items in arg hash list\n" }
 
     my %defaults = (
         rOpts           => undef,
@@ -55,7 +57,7 @@ sub new {
         is_encoded_data => undef,
     );
 
-    my %args = ( %defaults, @args );
+    my %args = ( %defaults, @arglist );
 
     my $rOpts           = $args{rOpts};
     my $log_file        = $args{log_file};
@@ -67,11 +69,11 @@ sub new {
     my $fh_warnings = $rOpts->{'standard-error-output'} ? $fh_stderr : undef;
 
     # remove any old error output file if we might write a new one
-    unless ( $fh_warnings || ref($warning_file) ) {
+    if ( !$fh_warnings && !ref($warning_file) ) {
         if ( -e $warning_file ) {
             unlink($warning_file)
               or Perl::Tidy::Die(
-                "couldn't unlink warning file $warning_file: $ERRNO\n");
+                "couldn't unlink warning file $warning_file: $OS_ERROR\n");
         }
     }
 
@@ -89,6 +91,7 @@ sub new {
         _rOpts                         => $rOpts,
         _fh_warnings                   => $fh_warnings,
         _last_input_line_written       => 0,
+        _last_input_line_number        => undef,
         _at_end_of_file                => 0,
         _use_prefix                    => 1,
         _block_log_output              => 0,
@@ -100,17 +103,24 @@ sub new {
         _warning_count                 => 0,
         _complaint_count               => 0,
         _is_encoded_data               => $is_encoded_data,
-        _saw_code_bug      => -1,                   # -1=no 0=maybe 1=for sure
-        _saw_brace_error   => 0,
+        _saw_code_bug      => -1,                    # -1=no 0=maybe 1=for sure
+        _saw_brace_error   =>  0,
         _output_array      => [],
         _input_stream_name => $input_stream_name,
         _filename_stamp    => $filename_stamp,
+        _save_logfile      => $rOpts->{'logfile'},
     }, $class;
-}
+} ## end sub new
 
 sub get_input_stream_name {
     my $self = shift;
     return $self->{_input_stream_name};
+}
+
+sub set_last_input_line_number {
+    my ( $self, $lno ) = @_;
+    $self->{_last_input_line_number} = $lno;
+    return;
 }
 
 sub get_warning_count {
@@ -141,33 +151,37 @@ sub interrupt_logfile {
     $self->warning("\n");
     $self->write_logfile_entry( '#' x 24 . "  WARNING  " . '#' x 25 . "\n" );
     return;
-}
+} ## end sub interrupt_logfile
 
 sub resume_logfile {
     my $self = shift;
     $self->write_logfile_entry( '#' x 60 . "\n" );
     $self->{_use_prefix} = 1;
     return;
-}
+} ## end sub resume_logfile
 
 sub we_are_at_the_last_line {
     my $self = shift;
-    unless ( $self->{_wrote_line_information_string} ) {
+    if ( !$self->{_wrote_line_information_string} ) {
         $self->write_logfile_entry("Last line\n\n");
     }
     $self->{_at_end_of_file} = 1;
     return;
-}
+} ## end sub we_are_at_the_last_line
 
 # record some stuff in case we go down in flames
 use constant MAX_PRINTED_CHARS => 35;
 
 sub black_box {
     my ( $self, $line_of_tokens, $output_line_number ) = @_;
+
+    # This routine saves information comparing the indentation of input
+    # and output lines when a detailed logfile is requested.
+    # This was very useful during the initial development of perltidy.
+
     my $input_line        = $line_of_tokens->{_line_text};
     my $input_line_number = $line_of_tokens->{_line_number};
 
-    # save line information in case we have to write a logfile message
     $self->{_line_of_tokens}                = $line_of_tokens;
     $self->{_output_line_number}            = $output_line_number;
     $self->{_wrote_line_information_string} = 0;
@@ -185,7 +199,7 @@ sub black_box {
         $structural_indentation_level = 0
           if ( $structural_indentation_level < 0 );
         $self->{_last_input_line_written} = $input_line_number;
-        ( my $out_str = $input_line ) =~ s/^\s*//;
+        ( my $out_str = $input_line ) =~ s/^\s+//;
         chomp $out_str;
 
         $out_str = ( '.' x $structural_indentation_level ) . $out_str;
@@ -196,7 +210,7 @@ sub black_box {
         $self->logfile_output( EMPTY_STRING, "$out_str\n" );
     }
     return;
-}
+} ## end sub black_box
 
 sub write_logfile_entry {
 
@@ -205,7 +219,7 @@ sub write_logfile_entry {
     # add leading >>> to avoid confusing error messages and code
     $self->logfile_output( ">>>", "@msg" );
     return;
-}
+} ## end sub write_logfile_entry
 
 sub write_column_headings {
     my $self = shift;
@@ -224,7 +238,7 @@ lines  levels i k            (code begins with one '.' per indent level)
 ------  ----- - - --------   -------------------------------------------
 EOM
     return;
-}
+} ## end sub write_column_headings
 
 sub make_line_information_string {
 
@@ -278,7 +292,7 @@ sub make_line_information_string {
 "L$input_line_number:$output_line_number$extra_space i$guessed_indentation_level:$structural_indentation_level $ci_level $bk $nesting_string";
     }
     return $line_information_string;
-}
+} ## end sub make_line_information_string
 
 sub logfile_output {
     my ( $self, $prompt, $msg ) = @_;
@@ -300,7 +314,7 @@ sub logfile_output {
         }
     }
     return;
-}
+} ## end sub logfile_output
 
 sub get_saw_brace_error {
     my $self = shift;
@@ -314,13 +328,13 @@ sub increment_brace_error {
 }
 
 sub brace_warning {
-    my ( $self, $msg ) = @_;
+    my ( $self, $msg, $msg_line_number ) = @_;
 
     use constant BRACE_WARNING_LIMIT => 10;
     my $saw_brace_error = $self->{_saw_brace_error};
 
     if ( $saw_brace_error < BRACE_WARNING_LIMIT ) {
-        $self->warning($msg);
+        $self->warning( $msg, $msg_line_number );
     }
     $saw_brace_error++;
     $self->{_saw_brace_error} = $saw_brace_error;
@@ -329,31 +343,40 @@ sub brace_warning {
         $self->warning("No further warnings of this type will be given\n");
     }
     return;
-}
+} ## end sub brace_warning
 
 sub complain {
 
     # handle non-critical warning messages based on input flag
-    my ( $self, $msg ) = @_;
+    my ( $self, $msg, $msg_line_number ) = @_;
     my $rOpts = $self->{_rOpts};
 
     # these appear in .ERR output only if -w flag is used
     if ( $rOpts->{'warning-output'} ) {
-        $self->warning($msg);
+        $self->warning( $msg, $msg_line_number );
     }
 
     # otherwise, they go to the .LOG file
     else {
         $self->{_complaint_count}++;
+        if ($msg_line_number) {
+
+            # NOTE: consider using same prefix as warning()
+            $msg = $msg_line_number . ':' . $msg;
+        }
         $self->write_logfile_entry($msg);
     }
     return;
-}
+} ## end sub complain
 
 sub warning {
 
-    # report errors to .ERR file (or stdout)
-    my ( $self, $msg ) = @_;
+    my ( $self, $msg, ($msg_line_number) ) = @_;
+
+    # Report errors to .ERR file (or stdout)
+    # Given:
+    #    $msg             = a string with the warning message
+    #    $msg_line_number = optional line number prefix
 
     use constant WARNING_LIMIT => 50;
 
@@ -361,18 +384,19 @@ sub warning {
     Perl::Tidy::Warn_count_bump();
 
     my $rOpts = $self->{_rOpts};
-    unless ( $rOpts->{'quiet'} ) {
+    if ( !$rOpts->{'quiet'} ) {
 
         my $warning_count   = $self->{_warning_count};
         my $fh_warnings     = $self->{_fh_warnings};
         my $is_encoded_data = $self->{_is_encoded_data};
         if ( !$fh_warnings ) {
             my $warning_file = $self->{_warning_file};
-            ( $fh_warnings, my $filename ) =
+            $fh_warnings =
               Perl::Tidy::streamhandle( $warning_file, 'w', $is_encoded_data );
-            $fh_warnings
-              or Perl::Tidy::Die("couldn't open $filename: $ERRNO\n");
-            Perl::Tidy::Warn_msg("## Please see file $filename\n")
+            if ( !$fh_warnings ) {
+                Perl::Tidy::Die("couldn't open warning file '$warning_file'\n");
+            }
+            Perl::Tidy::Warn_msg("## Please see file $warning_file\n")
               unless ref($warning_file);
             $self->{_fh_warnings} = $fh_warnings;
             $fh_warnings->print("Perltidy version is $Perl::Tidy::VERSION\n");
@@ -400,14 +424,11 @@ sub warning {
                 }
             }
 
-            if ( $self->get_use_prefix() > 0 ) {
+            if ( $self->get_use_prefix() > 0 && defined($msg_line_number) ) {
                 $self->write_logfile_entry("WARNING: $msg");
 
                 # add prefix 'filename:line_no: ' to message lines
-                my $input_line_number =
-                  Perl::Tidy::Tokenizer::get_input_line_number();
-                if ( !defined($input_line_number) ) { $input_line_number = -1 }
-                my $pre_string = $filename_stamp . $input_line_number . ': ';
+                my $pre_string = $filename_stamp . $msg_line_number . ': ';
                 chomp $msg;
                 $msg =~ s/\n/\n$pre_string/g;
                 $msg = $pre_string . $msg . "\n";
@@ -438,7 +459,7 @@ sub warning {
         }
     }
     return;
-}
+} ## end sub warning
 
 sub report_definite_bug {
     my $self = shift;
@@ -447,13 +468,8 @@ sub report_definite_bug {
 }
 
 sub get_save_logfile {
-
-    # To be called after tokenizer has finished to make formatting more
-    # efficient.
-    my $self         = shift;
-    my $saw_code_bug = $self->{_saw_code_bug};
-    my $rOpts        = $self->{_rOpts};
-    return $saw_code_bug == 1 || $rOpts->{'logfile'};
+    my $self = shift;
+    return $self->{_save_logfile};
 }
 
 sub finish {
@@ -461,49 +477,54 @@ sub finish {
     # called after all formatting to summarize errors
     my ($self) = @_;
 
-    my $rOpts         = $self->{_rOpts};
-    my $warning_count = $self->{_warning_count};
-    my $saw_code_bug  = $self->{_saw_code_bug};
+    my $warning_count   = $self->{_warning_count};
+    my $save_logfile    = $self->{_save_logfile};
+    my $log_file        = $self->{_log_file};
+    my $msg_line_number = $self->{_last_input_line_number};
 
-    my $save_logfile = $saw_code_bug == 1
-      || $rOpts->{'logfile'};
-    my $log_file = $self->{_log_file};
     if ($warning_count) {
         if ($save_logfile) {
             $self->block_log_output();    # avoid echoing this to the logfile
             $self->warning(
-                "The logfile $log_file may contain useful information\n");
+                "The logfile $log_file may contain useful information\n",
+                $msg_line_number );
             $self->unblock_log_output();
         }
 
         if ( $self->{_complaint_count} > 0 ) {
             $self->warning(
-"To see $self->{_complaint_count} non-critical warnings rerun with -w\n"
+"To see $self->{_complaint_count} non-critical warnings rerun with -w\n",
+                $msg_line_number
             );
         }
 
         if ( $self->{_saw_brace_error}
             && ( $self->{_logfile_gap} > 1 || !$save_logfile ) )
         {
-            $self->warning("To save a full .LOG file rerun with -g\n");
+            $self->warning( "To save a full .LOG file rerun with -g\n",
+                $msg_line_number );
         }
     }
 
     if ($save_logfile) {
         my $is_encoded_data = $self->{_is_encoded_data};
-        my ( $fh, $filename ) =
-          Perl::Tidy::streamhandle( $log_file, 'w', $is_encoded_data );
-        if ($fh) {
+        my $fh = Perl::Tidy::streamhandle( $log_file, 'w', $is_encoded_data );
+        if ( !$fh ) {
+            Perl::Tidy::Warn("unable to open log file '$log_file'\n");
+        }
+        else {
             my $routput_array = $self->{_output_array};
             foreach my $line ( @{$routput_array} ) { $fh->print($line) }
-            if ( $log_file ne '-' && !ref $log_file ) {
-                my $ok = eval { $fh->close(); 1 };
-                if ( !$ok && DEVEL_MODE ) {
-                    Fault("Could not close file handle(): $EVAL_ERROR\n");
-                }
+            if (   $fh->can('close')
+                && !ref($log_file)
+                && $log_file ne '-' )
+            {
+                $fh->close()
+                  or Perl::Tidy::Warn(
+                    "Error closing LOG file '$log_file': $OS_ERROR\n");
             }
         }
     }
     return;
-}
+} ## end sub finish
 1;

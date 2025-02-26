@@ -1,162 +1,157 @@
-# perlcritic is a good tool for locating potentially 'dodgy' coding.
+# This file is used for running Perl::Critic on Perl::Tidy modules.  Many of
+# the policies are excellent starting points for new code, but important
+# exceptions often exist which make it impossible to use them as rigid rules.
+
+# I have found the '## no critic' method for locally deactivating specific
+# policies to be far too troublesome to use.  So policies without fine tuning
+# controls have to either be 'on' or 'off'.
 
 # Some useful links:
+# https://metacpan.org/dist/Perl-Critic/view/lib/Perl/Critic/PolicySummary.pod
+# https://metacpan.org/pod/Perl::Critic::PolicySummary
 # https://manpages.ubuntu.com/manpages/xenial/man1/perlcritic.1p.html
 # https://perlmaven.com/perl-critic
-
-severity = 1
-
-verbose = %f: [%p] %m at line %l, column %c.\n
 
 # Example command to run a single policy on single module:
 # perlcritic --single-policy Subroutines::ProhibitSubroutinePrototypes Module.pm
 
-# Below is a list of policies that are skipped or customized to the needs of
-# Perl::Tidy.  I have found that using 'no critic' comments is very
-# troublesome*, so policies are either 'on' or 'off' for all modules.
-# ( *For example, why is it necessary to specify a policy in a side comment?
-# The very long policy names are ugly and typically make the side comment
-# exceed the desired line length. )
+# severity = 1 gives the most strict checking.
+severity = 1
 
-#--------------------------------------------------------------
-# Following is a list of policies to be skipped for severity=4:
-#--------------------------------------------------------------
+verbose = %f: [%p] %m at line %l, column %c.\n
 
-# There is a localization in Tokenizer.pm that is essential
-[-Variables::ProhibitLocalVars] 
-
-# Immediate initialization of locals is not appropriate where used
-# in the Tokenizer.pm module
-[-Variables::RequireInitializationForLocalVars] 
-
-# There is a stringy eval in Formatter.pm and Tokenizer.pm which is essential
-# for checking user input. So we have to skip this.
-[-BuiltinFunctions::ProhibitStringyEval]
+#---------------------------------------------------
+# Policies to be skipped or adjusted for severity=4:
+#---------------------------------------------------
 
 # Tidy.pm exports 'perltidy'. Changing this could break existing scripts.
 [-Modules::ProhibitAutomaticExportation]
 
-# 'print' and 'close' homonyms are appropriate where they are used.
-[-Subroutines::ProhibitBuiltinHomonyms]
-
-# Nested subs are used for error handling in Tidy.pm.
+# Nested subs are currently needed for error handling in Tidy.pm. I'm not
+# sure if this can be avoided.
 [-Subroutines::ProhibitNestedSubs]
 
-# In critical routines this can significantly reduce processing speed.
-# So we have to skip it.
-[-Subroutines::RequireArgUnpacking]
+# Make an exception for very short time-critical subs.
+[Subroutines::RequireArgUnpacking]
+short_subroutine_statements = 2
 
-# Completely Disagree. The advantages of 'use constant' greatly outweigh the
-# few disadvantages.  Perl::Tidy relies heavily on constants for efficient and
-# robust coding of array indexes and debug code, and to avoid autovivication
-# problems that would occur if hashes were used instead.
+# Disagree: The advantages of 'use constant' greatly outweigh the few
+# disadvantages.  Perl::Tidy relies heavily on constants
+#  -for efficient and robust coding of array indexes,
+#  -for avoiding autovivication issues if hashes were used instead,
+#  -and for eliminating debug code during compilation.
 [-ValuesAndExpressions::ProhibitConstantPragma]
 
-# Completely Disagree: adding quotes on here doc terminators causes needless
-# "line noise" in the source code.  Almost always the default works.  Besides,
-# my editor uses color to make it clear if interpolation is in effect.
+# Disagree: adding quotes on here doc terminators causes needless "line noise"
+# in the source code.  Almost always the default works.  Besides, my editor
+# uses color to make it clear if interpolation is in effect.
 [-ValuesAndExpressions::RequireQuotedHeredocTerminator]
 
-# Perlcritic doesn't know ARGV actually is localized (it would be hard
-# to program it to determine this).
+# Perlcritic doesn't seem to see that @ARGV in Perl::Tidy actually **is**
+# localized.  Localization of @ARGV could be avoided by calling
+# GetOptionsFromArray instead of GetOptions, but that is not available before
+# perl 5.10, and we want to continue supporting Perl 5.8. So we have to skip
+# this for now.  When the time comes to make perl 5.10 the earliest version
+# supported, this restriction can be deleted
 [-Variables::RequireLocalizedPunctuationVars]
 
-#--------------------------------------------------------------
-# Following is a list of policies to be skipped for severity=3:
-#--------------------------------------------------------------
+# Set the line limit a bit higher for sub 'backup_method_copy' in Perl::Tidy.pm
+# which has about 25 lines between open and close, largely comments.
+[InputOutput::RequireBriefOpen]
+lines=30
 
-# AUTOLOAD is used in perltidy to help find and debug programming errors.
-# This is very useful, so we have to skip this.
+# Perltidy modules IOScalar.pm and IOScalarArray.pm provide a print function,
+# but I had to turn this off because the 'allow' option does not seem to work
+[-Subroutines::ProhibitBuiltinHomonyms]
+# allow=print
+
+#---------------------------------------------------
+# Policies to be skipped or adjusted for severity=3:
+#---------------------------------------------------
+
+# AUTOLOAD is used in perltidy to help find and debug programming errors rather
+# than doing autoloading.  This is very useful, so we have to skip this.
 [-ClassHierarchies::ProhibitAutoloading]
 
-# The max values below can be reduced to locate code which might be improved.
-# The max_mccabe value is insanely high, due to years of updates and new
-# features, and I have been working to reduce it.  Sometimes debug and
-# diagnostic code gives high max_nests.  
-[Subroutines::ProhibitExcessComplexity]
-max_mccabe=245
-[ControlStructures::ProhibitDeepNests]
-max_nests=9
+# This policy is useful in locating complex code which might benefit from
+# simplification.  But it has been deactivated here because the mccabe
+# number is not a good measure of complexity of a sub which contains a number
+# of anonymous subs. A more useful number is the value 'mccabe2' which can
+# be optained with: perltidy -dbs file.pl >file.csv. For example, sub
+# 'scan_hash_keys' in perltidy has mccabe1=302 but mccabe2=130.
+[-Subroutines::ProhibitExcessComplexity]
+# max_mccabe=310
 
-# The if-elsif sequences in perltidy have all been profiled and
-# are fine as is. Changing them would complicate the code without
-# any benefit in reduced run time or clarity.
+# This policy can be very helpful for locating complex code, but sometimes
+# deep nests are the best option, especially in error handling and debug
+# coding. So a large value is used here.
+# sub Formatter::count_list_elements currently needs 10, several others need 9
+[ControlStructures::ProhibitDeepNests]
+max_nests=10
+
+# Agree that cascading elses are best avoided, but in reality there are a lot
+# of cases where they cannot be avoided.
 [-ControlStructures::ProhibitCascadingIfElse]
 
-# This is a reasonable policy for new code but it is not worth changing
-# debugged code for it.
-[-ControlStructures::ProhibitNegativeExpressionsInUnlessAndUntilConditions]
-
-# This is a good general policy but not always the best for efficiency
-[-Subroutines::ProhibitManyArgs]
+# This is a good general policy but the default max of 5 args is not always
+# possible in time-critical subs. One sub in perltidy has 11 args.
+[Subroutines::ProhibitManyArgs]
+max_arguments = 11
+skip_object = 1
 
 [-ClassHierarchies::ProhibitExplicitISA]
 
-# These are okay where used
-[-NamingConventions::ProhibitAmbiguousNames]
+# There is one complex regex in Tokenizer.pm for scanning numbers. It is
+# well commented and easy to read, and any changes would make it harder
+# to read. But rather than deactivate this policy, I have adjusted the
+# maximum number of characters to let this regex pass.
+[RegularExpressions::ProhibitComplexRegexes]
+max_characters=250
 
-# I find that using lvalue substr much clearer than adding another arg to
-# substr.  So skip this one.
-[-BuiltinFunctions::ProhibitLvalueSubstr]
-
-# The Tokenizer.pm needs package variables
-[-Variables::ProhibitPackageVars]
-
-# Do not change any debugged regular expressions without good reason.
-# It is too easy to introduce a subtle error.
+# A problem with ReqireExtendedFormatting is that it makes things needlessly
+# complex when matching things like line feeds and carriage returns.
 [-RegularExpressions::RequireExtendedFormatting]
-[-RegularExpressions::ProhibitComplexRegexes]
-[-RegularExpressions::ProhibitUnusedCapture]
-[-RegularExpressions::ProhibitCaptureWithoutTest]
 
-#--------------------------------------------------------------
-# Following is a list of policies to be skipped for severity=2:
-#--------------------------------------------------------------
+#---------------------------------------------------
+# Policies to be skipped or adjusted for severity=2:
+#---------------------------------------------------
 
 # Disagree. In fact, following this policy caused a parsing error in Perl
-# version 5.14 at file test operators.  So skip this.
+# version 5.14 at file test operators.  So skip this because it can cause
+# loss of code robustness.
 [-BuiltinFunctions::ProhibitUselessTopic]
 
-# Do not change any debugged regular expressions without good reason.
-# It is too easy to introduce a subtle error.
+# These would be okay for most new code, but do not change any debugged regular
+# expressions without good reason.  It is too easy to introduce a subtle error.
 [-RegularExpressions::RequireDotMatchAnything]
 [-RegularExpressions::RequireLineBoundaryMatching]
 
-# Disagree. Is '#' really harder to read than q{#}?
+# This is another one of those rules which often works but not always. Is '#'
+# really harder to read than q{#}?  And in tokenization code it is often
+# necessary to work with symbols like '{' '}' '<' and so on.  So we would need
+# q<{> q<}> q{<} and so on, which is hard on the eyes. Also, sometimes
+# perlcritic is inconsistent regarding this rule because sometimes wants to
+# apply this rule to hash keys, and sometimes not.
 [-ValuesAndExpressions::ProhibitNoisyQuotes]
 
-# In some cases a postfix control shows the logical flow best
-[-ControlStructures::ProhibitPostfixControls]
+# postfix 'if' is okay if it highlights control flow
+# postfix 'unless' is likewise okay if simple and without negative terms
+[ControlStructures::ProhibitPostfixControls]
+allow = if unless
 
-# Sometimes an unless block is clearer than an if block
-[-ControlStructures::ProhibitUnlessBlocks]
-
-# The very few instances of boolean grep are fine. Profiling shows that
-# changing them would not result in a measureable improvement in speed. 
-[-BuiltinFunctions::ProhibitBooleanGrep] 
-
-# The only escaped characters in Perl::Tidy are in code for detecting and
-# setting line endings ( CR and LF ).  This is fully debugged coding and 
-# best left unchanged.
-[-ValuesAndExpressions::ProhibitEscapedCharacters] 
-
-# These have been checked. This is a good idea but has to be turned off because
-# there are many cases where a number has been explained in a comment or is
-# obvious.
+# This is a good in general but has to be turned off here because there are
+# many cases where a number has been explained in a comment or is obvious.
 [-ValuesAndExpressions::ProhibitMagicNumbers]
+# allowed_values = -2 -1 0 1 2
 
-#--------------------------------------------------------------
-# Following is a list of policies to be skipped for severity=1:
-#--------------------------------------------------------------
+#---------------------------------------------------
+# Policies to be skipped or adjusted for severity=1:
+#---------------------------------------------------
 
 # This is a good starting rule, but occasional capitalization can be quite
-# effective, so we have to ignore it as a general rule:
+# effective or appropriate for marking a special variable, so we have to ignore
+# it as a general rule:
 [-NamingConventions::Capitalization]
-
-# It would be nice if this option were configurable to skip STDERR and STDOUT
-# which are used by perltidy for debug statements.  I don't think {*STDOUT} is
-# preferable to simply STDOUT. So skip it.
-[-InputOutput::RequireBracedFileHandleWithPrint]
 
 # PerlCritic should not suggest this policy for complex sorts because it can
 # change program behavior when a stable sort has been assumed.  And it does not
@@ -168,31 +163,33 @@ max_nests=9
 # you have a comparison of the form $b->[*] <=> $a->[*]. So skip this.
 [-BuiltinFunctions::ProhibitReverseSortBlock]
 
-# Do not change any debugged regular expressions without good reason.
-# It is too easy to introduce a subtle error.
+# There are too many of these in perltidy to change, and they seem fine
+# and not worth the effort of changing.
 [-RegularExpressions::ProhibitEscapedMetacharacters]
-[-RegularExpressions::ProhibitEnumeratedClasses]
-[-RegularExpressions::ProhibitUnusualDelimiters]
-[-RegularExpressions::ProhibitSingleCharAlternation]
-[-RegularExpressions::RequireBracesForMultiline]
-[-RegularExpressions::ProhibitSingleCharAlternation]
 
-# Completely disagree. Double quotes are easier to read than single quotes and
+# As the documentation says, this policy is not for everyone
+[-RegularExpressions::ProhibitEnumeratedClasses]
+
+# Disagree. Double quotes are easier to read than single quotes and
 # allow a uniform style for quotes.  My editor has color coding which indicates
 # interpolation. Double quotes do not increase processing time by any
 # measurable amount.  Using them as default simplfies making editing changes.
 # So skip this:
 [-ValuesAndExpressions::ProhibitInterpolationOfLiterals]
 
-# These have been checked and are correct as written 
+# Allowing this policy would require adding a whole lot of needless backslash
+# characters, thereby making things much harder to read.
 [-ValuesAndExpressions::RequireInterpolationOfMetachars]
 
-# Completely disagree: parens can add clarity and may even be essential.
-# There is little to be gained by omitting them.
-[-CodeLayout::ProhibitParensWithBuiltins] 
+# Disagree: parens can add clarity and may even be essential, for example in
+# ternary expressions. There is little to be gained by omitting them.
+[-CodeLayout::ProhibitParensWithBuiltins]
 
-# This is OK if we exclude 'print'. Most of the 'print' statements
-# in perltidy are for error reporting, and it does not help to add
-# more extra error checks on top of them. 
+# Exclude 'print' statements, which are mainly used for debug statements
+# and error reporting.
 [InputOutput::RequireCheckedSyscalls]
 exclude_functions = print
+
+# Use a perltidyrc which does some warning checks
+[CodeLayout::RequireTidyCode]
+perltidyrc = perltidyrc

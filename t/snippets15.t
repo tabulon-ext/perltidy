@@ -289,7 +289,7 @@ my $q = $rs
     {
         'track.id' => { -ident => 'none_search.id' },
     }
-)->as_query;
+  )->as_query;
 #6...........
         },
 
@@ -407,11 +407,11 @@ elsif ( $i > $depth )  { $_ = 0; }
 # no one-line block for first map with -ce -cbl=map,sort,grep
 @sorted = map {
     $_->[0]
-} sort {
+  } sort {
     $a->[1] <=> $b->[1] or $a->[0] cmp $b->[0]
-} map {
+  } map {
     [ $_, length($_) ]
-} @unsorted;
+  } @unsorted;
 #14...........
         },
 
@@ -435,7 +435,7 @@ sub get_val () {
 
 }
 
-method get_value() {
+method get_value () {
 
 }
 

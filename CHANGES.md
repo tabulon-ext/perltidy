@@ -1,14 +1,974 @@
 # Perltidy Change Log
 
-## 2022 xx xx
+## 2025 02 14.02
+
+    - Fig git #32, a tokenization error.
+
+    - A new option --dump-similar-keys will dump hash keys which are
+      similar but slightly different to standard output and then exit.
+      A related option --warn-similar-keys will report keys with are similar
+      to the error output while formatting. Both of these can be controlled
+      by parameters which are described in the input manual.
+
+    - A new option --dump-hash-keys will dump all hash keys found by
+      perltidy to standard output.
+
+    - The output table for --dump-block-summary has an additional field.
+      It is an alternate McCabe complexity count which is the same as
+      the previous count except for subs. For subs, the complexity number
+      is reduced by the values for any contained anonymous subs.
+
+    - Fix git #181, remove continuation indentation from closing brace
+      of an anonymous sub which terminates an input stream.
+
+## 2025 02 14
+
+    - A new option --keep-old-blank-lines-exceptions=s, or --kblx=s,
+      allows selected blank lines to be ignored when an input stream
+      is read. The parameter s is used to select the blank lines to
+      be ignored. This option provides an inverse to other blank line
+      parameters. The manual has details. See discussion git #180.
+
+    - A new option --warn-unused-keys, or -wuk, has been added which will
+      produce warnings for unused hash keys during formatting. This is similar
+      to --dump-unused-keys, which just exits and does not continue formatting.
+      A related new parameter --warn-unused-keys-cutoff=N provides control
+      over a filter which prevents warnings for keys which appear to be
+      members of large hashes used to communicate with external packages.
+      The manual has details.  See also git #177.
+
+    - A new option --pack-opening-types='->' has been added to provide more
+      control over breaks of method call chains.  It tells perltidy not to
+      break at every method call when a chain of calls spans multiple lines.
+      This was the behavior in versions prior to 20250105. The default
+      starting with 20250105 is to break at each call of a method call chain
+      which spans multiple lines. The manual has details. See also git #171.
+
+## 2025 01 05
+
+    - If a file consists only of comments, then the starting indentation will
+      be guessed from the indentation of the first comment. Previously it would
+      be guessed to be zero. Parameter --starting-indentation-level=n can be
+      used to specify an indentation and avoid a guess. This issue can
+      arise when formatting a block of comments from within an editor.
+
+    - Added missing 'use File::Temp' for -html option. This was causing the
+      message: "Undefined subroutine &File::Temp::tempfile called at ..."
+      See git #176.
+
+    - A new parameter --dump-unique-keys, or -duk, dumps a list of hash keys
+      which appear to be used just once, and do not appear among the quoted
+      strings in a file. For example:
+
+         perltidy -duk File.pm >output.txt
+
+      This can help locate misspelled hash keys.
+
+    - Line breaks at long chains of method calls now break at all calls
+      with args in parens, as in this example from git #171
+
+        # Old default
+        sub bla_p( $value = 42 ) {
+            return Mojo::Promise->resolve($value)->then( sub { shift() / 2 } )
+              ->then( sub { shift() + 6 } )->then( sub { shift() / 2 } )
+              ->catch( sub { warn shift } );
+        }
+
+        # New default
+        sub bla_p( $value = 42 ) {
+            return Mojo::Promise->resolve($value)
+              ->then( sub { shift() / 2 } )
+              ->then( sub { shift() + 6 } )
+              ->then( sub { shift() / 2 } )
+              ->catch( sub { warn shift } );
+        }
+
+    - Parameter --break-at-old-method-breakpoints, or -bom, has been
+    updated to insure that it only applies to lines beginning with
+    method calls, as intended.  Line breaks for all lines beginning with
+    '->', even non-method calls, can be retained by using
+    --keep-old-breakpoints-before='->'.
+
+    - Added parameter --multiple-token-tightness=s, or -mutt=s.
+    The default value --paren-tightness=1 adds space within the parens
+    if, and only if, the container holds multiple tokens.  Some perltidy
+    tokens may be rather long, and it can be preferable to also space some of
+    them as if they were multiple tokens.  This can be done with this parameter,
+    and it applies to parens as well as square brackets and curly braces.
+    For example, the default below has no space within the square brackets:
+
+        # perltidy
+        my $rlist = [qw( alpha beta gamma )];
+
+    Spaces can be obtained with:
+
+        # perltidy -mutt='q*'
+        my $rlist = [ qw( alpha beta gamma ) ];
+
+    The parameter -mutt='q*' means treat qw and similar quote operators as
+    multiple tokens.  The manual has details; git #120 has another example.
+
+    - Added parameter --indent-leading-semicolon, -ils; see git #171. When
+    this is negated, a line with a leading semicolon does not get the extra
+    leading continuation indentation spaces (defined with -ci=n).
+
+    - Space around here doc delimiters follow spacing controls better. For
+    example, a space is now added before the closing paren here:
+
+       OLD: (without the here doc):
+       push( @script, <<'EOT');
+
+       NEW:
+       push( @script, <<'EOT' );
+
+    Also, any spaces between the '<<' and here target are removed (git #174):
+
+       OLD:
+       push( @script, <<  'EOT');
+
+       NEW:
+       push( @script, <<'EOT' );
+
+    - Added parameter --break-at-trailing-comma-types=s, or -btct=s, where
+    s is a string which selects trailing commas.  For example, -btct='f(b'
+    places a line break after all bare trailing commas in function calls.
+    The manual has details.
+
+    - Fix git #165, strings beginning with v before => gave an incorrect error
+    message.
+
+    - The parameter --add-lone-trailing-commas, -altc, is now on by default.
+    This will simplify input for trailing comma operations. Use
+    --noadd-lone-trailing-commas, or -naltc to turn it off.
+
+    - More edge cases for adding and deleting trailing commas are now handled
+    (git #156).
+
+    - A problem has been fixed in which the addition or deletion of trailing
+    commas with the -atc or -dtc flags did not occur due to early convergence
+    when the -conv flag was set (git #143).
+
+    - Added parameter --qw-as-function, or -qwaf, discussed in git #164.
+    When this parameter is set, a qw list which begins with 'qw(' is
+    formatted as if it were a function call with call args being a list
+    of comma-separated quoted items. For example, given this input:
+
+    @fields = qw( $st_dev	   $st_ino    $st_mode $st_nlink   $st_uid
+      $st_gid $st_rdev    $st_size $st_atime   $st_mtime  $st_ctime
+      $st_blksize $st_blocks);
+
+    # perltidy -qwaf
+    @fields = qw(
+        $st_dev   $st_ino   $st_mode  $st_nlink
+        $st_uid   $st_gid   $st_rdev  $st_size
+        $st_atime $st_mtime $st_ctime $st_blksize
+        $st_blocks
+    );
+
+## 2024 09 03
+
+    - Add partial support for Syntax::Operator::In and Syntax::Keyword::Match
+      (see git #162).
+
+    - Add --timeout-in-seconds=n, or -tos=n.  When the standard input supplies
+      the input stream, and the input has not been received within n seconds,
+      perltidy will end with a timeout message.  The intention is to catch
+      a situation where perltidy is accidentally invoked without a file to
+      process and therefore waits for input from the system standard input
+      (stdin), which never arrives.  The default is n=10.
+      This check can be turned off with -tos=0.
+
+    - Add parameter --closing-side-comment-exclusion-list=string, or
+      -cscxl=string, where string is a list of block types to exclude
+      for closing side comment operations.  Also, closing side comments
+      now work for anonymous subs if a --closing-side-comment-list (-cscl)
+      is not specified, and when 'asub' is requested with -cscl=asub.
+      Use -cscxl=asub to prevent this.
+
+    - Include check for unused constants in --dump-unusual-variables and
+      --warn-variable-types (new issue type 'c'). Also expand checks to
+      cover variables introduced with 'use vars'.
+
+    - Include signature variables in --dump-unusual-variables and
+      --warn-variable-types; see git #158.
+
+    - Add logical xor operator ^^ available in perl version 5.40, as
+      noted in git #157.
+
+    - Keyword 'state' now has default space before a paren, like 'my'.
+      Previously there was no space and no control.  So the default
+      is now "state ($x)". This space can be removed with -nsak='state'.
+
+    - Add options --add-lone-trailing-commas, -altc and
+      --delete-lone-trailing-commas, -dltc, to provide control over adding
+      and deleting the only comma in a list.  See discussion in git #143
+      and the updated manual.
+
+    - Add options --dump-mismatched-returns (or -dmr) and
+      --warn-mismatched-returns (or -wmr).  These options report function
+      calls where the number of values requested may disagree with sub
+      return statements.  The -dump version writes the results for a single
+      file to standard output and exits:
+
+         perltidy -dmr somefile.pl >results.txt
+
+      The -warn version formats as normal but reports any issues as warnings in
+      the error file:
+
+         perltidy -wmr somefile.pl
+
+      The -warn version may be customized with the following additional
+      parameters if necessary to avoid needless warnings:
+
+      --warn-mismatched-return-types=s (or -wmrt=s),
+      --warn-mismatched-return-exclusion-list=s (or -wmrxl=s)
+
+      where 's' is a control string. These are explained in the manual.
+
+    - Updates for issue git #151:
+      (1) --warn-variable-types=u is now okay if a named file is processed.
+      (2) --warn-variable-exclusion-list=s now allows leading and/or
+      trailing * on variable names to allow a wildcard match. For example
+      -wvxl='*_unused' is okay and would match $var1_unused and $var2_unused.
+      (3) --dump-unusual-variables now outputs the filename.
+
+    - A option was added to filter unimplemented parameters from perltidy
+      configuration files, suggested in git #146.  It works like this: if
+      a line in the config file begins with three dashes followed by a
+      parameter name (rather than two dashes), then the line will be removed
+      if the parameter is unknown. Otherwise, a dash will be removed to make
+      the line valid.
+
+    - Parameters --dump-mismatched-args (or -dma) and
+      --warn-mismatched-args (or -wma) have been updated to catch more
+      arg count issues.
+
+    - Fixed issue git #143, extend -add-trailing-commas to apply to a list
+      with just a fat comma.
+
+    - The minimum perl version is 5.8.1. Previously it was 5.8.0, which was
+      not correct because of the use of utf8::is_utf8.
+
+    - Fixed issue git #142, test failure installing on perl versions before
+      version 5.10.  The error caused the new parameter
+      -interbracket-arrow-style=s not to work. Except for this limitation,
+      Version 20240511 will work on older perl versions.
+
+## 2024 05 11
+
+    - The option --valign-signed-numbers, or -vsn is now the default. It
+      was introduced in the previous release has been found to significantly
+      improve the overall appearance of columns of signed and unsigned
+      numbers.  See the previous Change Log entry for an example.
+      This will change the formatting in scripts with columns
+      of vertically aligned signed and unsigned numbers.
+      Use -nvsn to turn this option off and avoid this change.
+
+    - The option --delete-repeated-commas is now the default.
+
+      It makes the following checks and changes:
+      - Repeated commas like ',,' are removed with a warning
+      - Repeated fat commas like '=> =>' are removed with a warning
+      - The combination '=>,' produces a warning but is not changed
+      These warnings are only output if --warning-output, or -w, is set.
+
+      Use --nodelete-repeated-commas, or -ndrc, to retain repeated commas.
+
+    - Previously, a line break was always made before a concatenated
+      quoted string, such as "\n", if the previous line had a greater
+      starting indentation. An exception is now made for a short concatenated
+      terminal quote.  This keeps code a little more compact. For example:
+
+    # basic rule: break before "\n" here because '$name' has more indentation:
+    my $html = $this->SUPER::genObject( $query, $bindNode, $field . ":$var",
+        $name, "remove", "UNCHECKED" )
+      . "\n";
+
+    # modified rule: make an exception for a short terminal quote like "\n"
+    my $html = $this->SUPER::genObject( $query, $bindNode, $field . ":$var",
+        $name, "remove", "UNCHECKED" ) . "\n";
+
+    - The operator ``**=`` now has spaces on both sides by default. Previously,
+      there was no space on the left.  This change makes its spacing the same
+      as all other assignment operators. The previous behavior can be obtained
+      with the parameter setting -nwls='**='.
+
+    - The option --file-size-order, or -fso is now the default. When
+      perltidy is given a list of multiple filenames to process, they
+      are sorted by size and processed in order of increasing size.
+      This can significantly reduce memory usage by Perl.  This
+      option has always been used in testing, where typically several
+      jobs each operating on thousands of filenames are running at the
+      same time and competing for system resources.  If this option
+      is not wanted for some reason, it can be deactivated with -nfso.
+
+    - In the option --dump-block-summary, the number of sub arguments indicated
+      for each sub now includes any leading object variable passed with
+      an arrow-operator call.  Previously the count would have been decreased
+      by one in this case. This change is needed for compatibility with future
+      updates.
+
+    - Fix issue git #138 involving -xlp (--extended-line-up-parentheses).
+      When multiple-line quotes and regexes have long secondary lines, these
+      line lengths could influencing some spacing and indentation, but they
+      should not have since perltidy has no control over their indentation.
+      This has been fixed. This will mainly influence code which uses -xlp
+      and has long multi-line quotes.
+
+    - Add option --minimize-continuation-indentation, -mci (see git #137).
+      This flag allows perltidy to remove continuation indentation in some
+      special cases where it is not really unnecessary. For a simple example,
+      the default formatting for the following snippet is:
+
+        # perltidy -nmci
+        $self->blurt( "Error: No INPUT definition for type '$type', typekind '"
+              . $type->xstype
+              . "' found" );
+
+      The second and third lines are one level deep in a container, and
+      are also statement continuations, so they get indented by the sum
+      of the -i value and the -ci value.  If this flag is set, the
+      indentation is reduced by -ci spaces, giving
+
+        # perltidy -mci
+        $self->blurt( "Error: No INPUT definition for type '$type', typekind '"
+            . $type->xstype
+            . "' found" );
+
+      This situation is relatively rare except in code which has long
+      quoted strings and the -nolq flag is also set.  This flag is currently
+      off by default, but it could become the default in a future version.
+
+    - Add options --dump-mismatched-args (or -dma) and
+      --warn-mismatched-args (or -wma).  These options look
+      for and report instances where the number of args expected by a
+      sub appear to differ from the number passed to the sub.  The -dump
+      version writes the results for a single file to standard output
+      and exits:
+
+         perltidy -dma somefile.pl >results.txt
+
+      The -warn version formats as normal but reports any issues as warnings in
+      the error file:
+
+         perltidy -wma somefile.pl
+
+      The -warn version may be customized with the following additional parameters
+      if necessary to avoid needless warnings:
+
+      --warn-mismatched-arg-types=s (or -wmat=s),
+      --warn-mismatched-arg-exclusion-list=s (or -wmaxl=s), and
+      --warn-mismatched-arg-undercount-cutoff=n (or -wmauc=n).
+      --warn-mismatched-arg-overcount-cutoff=n (or -wmaoc=n).
+
+      These are explained in the manual.
+
+    - Add option --valign-wide-equals, or -vwe, for issue git #135.
+      Setting this parameter causes the following assignment operators
+
+         = **= += *= &= <<= &&= -= /= |= >>= ||= //= .= %= ^= x=
+
+      to be aligned vertically with the ending = all aligned. For example,
+      here is the default formatting of a snippet of code:
+
+            $str .= SPACE x $total_pad_count;
+            $str_len += $total_pad_count;
+            $total_pad_count = 0;
+            $str .= $rfields->[$j];
+            $str_len += $rfield_lengths->[$j];
+
+      And here is the same code formatted with -vwe:
+
+            # perltidy -vwe
+            $str             .= SPACE x $total_pad_count;
+            $str_len         += $total_pad_count;
+            $total_pad_count  = 0;
+            $str             .= $rfields->[$j];
+            $str_len         += $rfield_lengths->[$j];
+
+      This option currently is off by default to avoid changing existing
+      formatting.
+
+    - Added control --delete-interbracket-arrows, or -dia, to delete optional
+      hash ref and array ref arrows between brackets as in the following
+      expression (see git #131)
+
+        return $self->{'commandline'}->{'arg_list'}->[0]->[0]->{'hostgroups'};
+
+        # perltidy -dia gives:
+        return $self->{'commandline'}{'arg_list'}[0][0]{'hostgroups'};
+
+      Added the opposite control --aia-interbracket-arrows, or -aia, to
+      add arrows. So applied to the previous line the arrows are restored:
+
+        # perltidy -aia
+        return $self->{'commandline'}->{'arg_list'}->[0]->[0]->{'hostgroups'};
+
+     The manual describes additional controls for adding and deleting
+     just selected interbracket arrows.
+
+## 2024 02 02
+
+    - Added --valign-signed-numbers, or -vsn. This improves the appearance
+      of columns of numbers by aligning leading algebraic signs.  For example:
+
+            # perltidy -vsn
+            my $xyz_shield = [
+                [ -0.060,  -0.060,  0. ],
+                [  0.060,  -0.060,  0. ],
+                [  0.060,   0.060,  0. ],
+                [ -0.060,   0.060,  0. ],
+                [ -0.0925, -0.0925, 0.092 ],
+                [  0.0925, -0.0925, 0.092 ],
+                [  0.0925,  0.0925, 0.092 ],
+                [ -0.0925,  0.0925, 0.092 ],
+            ];
+
+            # perltidy -nvsn (current DEFAULT)
+            my $xyz_shield = [
+                [ -0.060,  -0.060,  0. ],
+                [ 0.060,   -0.060,  0. ],
+                [ 0.060,   0.060,   0. ],
+                [ -0.060,  0.060,   0. ],
+                [ -0.0925, -0.0925, 0.092 ],
+                [ 0.0925,  -0.0925, 0.092 ],
+                [ 0.0925,  0.0925,  0.092 ],
+                [ -0.0925, 0.0925,  0.092 ],
+            ];
+
+      This new option works well but is currently OFF to allow more testing
+      and fine-tuning. It is expected to be activated in a future release.
+
+    - Added --dump-mixed-call-parens (-dmcp ) which will dump a list of
+      operators which are sometimes followed by parens and sometimes not.
+      This can be useful for developing a uniform style for selected operators.
+      Issue git #128. For example
+
+         perltidy -dmcp somefile.pl >out.txt
+
+      produces lines like this, where the first number is the count of
+      uses with parens, and the second number is the count without parens.
+
+        k:caller:2:1
+        k:chomp:3:4
+        k:close:7:4
+
+    - Added --want-call-parens=s (-wcp=s) and --nowant-call-parens=s (-nwcp=s)
+      options which will warn of paren uses which do not match a selected
+      style. The manual has details. But for example,
+
+        perltidy -wcp='&' somefile.pl
+
+      will format as normal but warn if any user subs are called without parens.
+
+    - Added --dump-unusual-variables (-duv) option to dump a list of
+      variables with certain properties of interest.  For example
+
+         perltidy -duv somefile.pl >vars.txt
+
+      produces a file with lines which look something like
+
+         1778:u: my $input_file
+         6089:r: my $j: reused - see line 6076
+
+      The values on the line which are separated by colons are:
+
+        line number   - the number of the line of the input file
+        issue         - a single letter indicating the issue, see below
+        variable name - the name of the variable, preceded by a keyword
+        note          - an optional note referring to another line
+
+      The issue is indicated by a letter which may be one of:
+
+        r: reused variable name
+        s: sigil change but reused bareword
+        p: lexical variable with scope in multiple packages
+        u: unused variable
+
+      This is very useful for locating problem areas and bugs in code.
+
+    - Added a related flag --warn-variable-types=string (-wvt=string) option
+      to warn if certain types of variables are found in a script. The types
+      are a space-separated string which may include 'r', 's', and 'p' but
+      not 'u'. For example
+
+        perltidy -wvt='r s' somefile.pl
+
+      will check for and warn if any variabls of type 'r', or 's' are seen,
+      but not 'p'. All possible checks may be indicated with a '*' or '1':
+
+        perltidy -wvt='*' somefile.pl
+
+      The manual has further details.
+
+    - All parameters taking integer values are now checked for
+      out-of-range values before processing starts. When a maximum or
+      maximum range is exceeded, the new default behavior is to write a
+      warning message, reset the value to its default setting, and continue.
+      This default behavior can be changed with the new parameter
+      --integer-range-check=n, or -irc=n, as follows:
+
+        n=0  skip check completely (for stress-testing perltidy only)
+        n=1  reset bad values to defaults but do not issue a warning
+        n=2  reset bad values to defaults and issue a warning [DEFAULT]
+        n=3  stop immediately if any values are out of bounds
+
+      The settings n=0 and n=1 are mainly useful for testing purposes.
+
+    - The --dump-block-summary (-dbs) option now includes the number of sub
+      args in the 'type' column. For example, 'sub(9)' indicates a sub
+      with 9 args.  Subs whose arg count cannot easily be determined are
+      indicated as 'sub(*)'. The count does not include a leading '$self'
+      or '$class' arg.
+
+    - Added flag --space-signature-paren=n, or -ssp=n (issue git #125).
+      This flag works the same as the existing flag --space-prototype-paren=n
+      except that it applies to the space before the opening paren of a sub
+      signature instead of a sub prototype.  Previously, there was no control
+      over this (a space always occurred). For example, given the following
+      line:
+
+        sub circle( $xc, $yc, $rad );
+
+      The following results can now be obtained, according to the value of n:
+
+        sub circle( $xc, $yc, $rad );   # n=0 [no space]
+        sub circle( $xc, $yc, $rad );   # n=1 [default; same as input]
+        sub circle ( $xc, $yc, $rad );  # n=2 [space]
+
+      The spacing in previous versions of perltidy corresponded to n=2 (always
+      a space). The new default value, n=1, will produce a space if and only
+      if there was a space in the input text.
+
+    - The --dump-block-summary option can report an if-elsif-elsif-.. chain
+      as a single line item with the notation -dbt='elsif3', for example,
+      where the '3' is an integer which specifies the minimum number of elsif
+      blocks required for a chain to be reported. The manual has details.
+
+    - Fix problem c269, in which the new -ame parameter could incorrectly
+      emit an else block when two elsif blocks were separated by a hanging
+      side comment (a very rare situation).
+
+    - When braces are detected to be unbalanced, an attempt is made to
+      localize the error by comparing the indentation at closing braces
+      with their actual nesting levels. This can be useful for files which
+      have previously been formatted by perltidy. To illustrate, a test was
+      made in which the closing brace at line 30644 was commented out in
+      a file with a total of over 62000 lines.  The new error message is
+
+        Final nesting depth of '{'s is 1
+        The most recent un-matched '{' is on line 6858
+        ...
+        Table of nesting level differences at closing braces.
+        This might help localize brace errors if the file was previously formatted.
+        line:  (brace level) - (level expected from old indentation)
+        30643: 0
+        30645: 1
+
+      Previously, the error file only indicated that the error in this case
+      was somewhere after line 6858, so the new table is very helpful. Closing
+      brace indentation is checked because it is unambiguous and can be done
+      very efficiently.
+
+    - The -DEBUG option no longer automatically also writes a .LOG file.
+      Use --show-options if the .LOG file is needed.
+
+    - The run time of this version with all new options in use is no greater
+      than that of the previous version thanks to optimization work.
+
+## 2023 09 12
+
+    - Fix for git #124: remove a syntax error check which could cause
+      an incorrect error message when List::Gather::gather was used.
+
+## 2023 09 09
+
+    - Added new parameters -wme, or --warn-missing-else, and -ame,
+      or --add-missing else.  The parameter -wme tells perltidy to issue
+      a warning if an if-elsif-... chain does not end in an else block.
+      The parameter -ame tells perltidy to insert an else block at the
+      end of such a chain if there is none.
+
+      For example, given the following snippet:
+
+        if    ( $level == 3 ) { $val = $global{'section'} }
+        elsif ( $level == 2 ) { $val = $global{'chapter'} }
+
+      # perltidy -ame
+        if    ( $level == 3 ) { $val = $global{'section'} }
+        elsif ( $level == 2 ) { $val = $global{'chapter'} }
+        else {
+            ##FIXME - added with perltidy -ame
+        }
+
+      The resulting code should be carefully reviewed, and the ##FIXME comment
+      should be updated as appropriate.  The text of the ##FIXME comment can be
+      changed with parameter -amec=s, where 's' is the comment to mark the new
+      else block. The man pages have more details.
+
+    - The syntax of the parameter --use-feature=class, or -uf=class, which
+      new in the previous release, has been changed slightly for clarity.
+      The default behavior, which occurs if this flag is not entered, is
+      to automatically try to handle both old and new uses of the keywords
+      'class', 'method', 'field', and 'ADJUST'.
+      To force these keywords to only follow the -use feature 'class' syntax,
+      enter --use-feature=class.
+      To force perltidy to ignore the -use feature 'class' syntax, enter
+      --use-feature=noclass.
+
+    - Issue git #122. Added parameter -lrt=n1:n2, or --line-range-tidy=n1:n2
+      to limit tidy operations to a limited line range.  Line numbers start
+      with 1. This parameter is mainly of interest to editing programs which
+      drive perltidy. The man pages have details.
+
+    - Some fairly rare instances of incorrect spacing have been fixed.  The
+      problem was that the tokenizer being overly conservative in marking
+      terms as possible filehandles or indirect objects. This causes the space
+      after the possible filehandle to be frozen to its input value in order not
+      to introduce an error in case Perl had to guess.  The problem was fixed
+      by having the tokenizer look ahead for operators which can eliminate the
+      uncertainty.  To illustrate, in the following line the term ``$d`` was
+      previously marked as a possible filehandle, so no space was added after it.
+
+          print $d== 1 ? " [ON]\n" : $d ? " [$d]\n" : "\n";
+                  ^
+
+      In the current version, the next token is seen to be an equality, so
+      ``$d`` is marked as an ordinary identifier and normal spacing rules
+      can apply:
+
+          print $d == 1 ? " [ON]\n" : $d ? " [$d]\n" : "\n";
+                  ^
+
+    - This version runs 7 to 10 percent faster than the previous release on
+      large files, depending on options and file type. Much of the gain comes
+      from streamlined I/O operations.
+
+    - This version was stress-tested for many cpu hours with random
+      input parameters. No failures to converge, internal fault checks,
+      undefined variable references or other irregularities were seen.
+
+
+## 2023 07 01
+
+    - Issue git #121. Added parameters -xbt, or --extended-block-tightness,
+      and -xbtl=s, or --extended-block-tightness-list=s, to allow
+      certain small code blocks to have internal spacing controlled by
+      -bbt=n rather than -bt=n. The man pages have details.
+
+    - Issue git #118. A warning will be issued if a duplicate format-skipping
+      starting marker is seen within a format-skipping section. The same
+      applies to duplicate code-skipping starting markers within code-skipping
+      sections.
+
+    - Issue git #116. A new flag --valign-if-unless, -viu, was added to
+      allow postfix 'unless' terms to align with postfix 'if' terms.  The
+      default remains not to do this.
+
+    - Fixed git #115. In the two most recent CPAN releases, when the
+      Perl::Tidy module was called with the source pointing to a file,
+      but no destination specified, the output went to the standard
+      output instead of to a file with extension ``.tdy``, as it should
+      have.  This has been fixed.
+
+    - Fixed git #110, add missing documentation for new options
+      -cpb and -bfvt=n. These work in version 20230309 but the pod
+      documentation was missing and has been added.
+
+    - Fixed an undefined reference message when running with
+      --dump-block-summary on a file without any subs or other
+      selected block types.
+
+    - Add parameter -ipc, or --ignore-perlcritic-comments.  Perltidy, by
+      default, will look for side comments beginning with ``## no critic`` and
+      ignore their lengths when making line break decisions, even if the user
+      has not set ``-iscl``.  The reason is that an unwanted line break can
+      make these special comments ineffective in controlling ``perlcritic``.
+      The parameter -ipc can be set if, for some reason, this is not wanted.
+
+    - Some minor issues with continuation indentation have been fixed.
+      Most scripts will remain unchanged.  The main change is that block
+      comments which occur just before a closing brace, bracket or paren
+      now have an indentation which is independent of the existence of
+      an optional comma or semicolon.  Previously, adding or deleting
+      an optional trailing comma could cause their indentation to jump.
+      Also, indentation of comments within ternary statements has been
+      improved. For additional details see:
+
+      https://github.com/perltidy/perltidy/blob/master/docs/ci_update.md
+
+    - This version was stress-tested for many cpu hours with random
+      input parameters. No failures to converge, internal fault checks,
+      undefined variable references or other irregularities were seen.
+
+    - This version runs several percent faster than the previous release
+      on large files.
+
+## 2023 03 09
+
+    - No significant bugs have been found since the last release to CPAN.
+      Several minor issues have been fixed, and some new parameters have been
+      added, as follows:
+
+    - Added parameter --one-line-block-exclusion-list=s, or -olbxl=s, where
+      s is a list of block types which should not automatically be turned
+      into one-line blocks.  This implements the issue raised in PR #111.
+      The list s may include any of the words 'sort map grep eval', or
+      it may be '*' to indicate all of these.  So for example to prevent
+      multi-line 'eval' blocks from becoming one-line blocks, the command
+      would be -olbxl='eval'.
+
+    - For the -b (--backup-and-modify-in-place) option, the file timestamps
+      are changing (git #113, rt#145999).  First, if there are no formatting
+      changes to an input file, it will keep its original modification time.
+      Second, any backup file will keep its original modification time.  This
+      was previously true for --backup-method=move but not for the default
+      --backup-method=copy.  The purpose of these changes is to avoid
+      triggering Makefile operations when there are no actual file changes.
+      If this causes a problem please open an issue for discussion on github.
+
+    - A change was made to the way line breaks are made at the '.'
+      operator when the user sets -wba='.' to requests breaks after a '.'
+      ( this setting is not recommended because it can be hard to read ).
+      The goal of the change is to make switching from breaks before '.'s
+      to breaks after '.'s just move the dots from the end of
+      lines to the beginning of lines.  For example:
+
+            # default and recommended (--want-break-before='.'):
+            $output_rules .=
+              (     'class'
+                  . $dir
+                  . '.stamp: $('
+                  . $dir
+                  . '_JAVA)' . "\n" . "\t"
+                  . '$(CLASSPATH_ENV) $(JAVAC) -d $(JAVAROOT) '
+                  . '$(JAVACFLAGS) $?' . "\n" . "\t"
+                  . 'echo timestamp > class'
+                  . $dir
+                  . '.stamp'
+                  . "\n" );
+
+            # perltidy --want-break-after='.'
+            $output_rules .=
+              ( 'class' .
+                  $dir .
+                  '.stamp: $(' .
+                  $dir .
+                  '_JAVA)' . "\n" . "\t" .
+                  '$(CLASSPATH_ENV) $(JAVAC) -d $(JAVAROOT) ' .
+                  '$(JAVACFLAGS) $?' . "\n" . "\t" .
+                  'echo timestamp > class' .
+                  $dir .
+                  '.stamp' .
+                  "\n" );
+
+      For existing code formatted with -wba='.', this may cause some
+      changes in the formatting of code with long concatenation chains.
+
+    - Added option --use-feature=class, or -uf=class, for issue rt #145706.
+      This adds keywords 'class', 'method', 'field', and 'ADJUST' in support of
+      this feature which is being tested for future inclusion in Perl.
+      An effort has been made to avoid conflicts with past uses of these
+      words, especially 'method' and 'class'. The default setting
+      is --use-feature=class. If this causes a conflict, this option can
+      be turned off by entering -uf=' '.
+
+      In other words, perltidy should work for both old and new uses of
+      these keywords with the default settings, but this flag is available
+      if a conflict arises.
+
+    - Added option -bfvt=n, or --brace-follower-vertical-tightness=n,
+      for part of issue git #110.  For n=2, this option looks for lines
+      which would otherwise be, by default,
+
+      }
+        or ..
+
+      and joins them into a single line
+
+      } or ..
+
+      where the or can be one of a number of logical operators or if unless.
+      The default is not to do this and can be indicated with n=1.
+
+    - Added option -cpb, or --cuddled-paren-brace, for issue git #110.
+      This option will cause perltidy to join two lines which
+      otherwise would be, by default,
+
+        )
+      {
+
+      into a single line
+
+      ) {
+
+    - Some minor changes to existing formatted output may occur as a result
+      of fixing minor formatting issues with edge cases.  This is especially
+      true for code which uses the -lp or -xlp styles.
+
+    - Added option -dbs, or --dump-block-summary, to dump summary
+      information about code blocks in a file to standard output.
+      The basic command is:
+
+          perltidy -dbs somefile.pl >blocks.csv
+
+      Instead of formatting ``somefile.pl``, this dumps the following
+      comma-separated items describing its blocks to the standard output:
+
+       filename     - the name of the file
+       line         - the line number of the opening brace of this block
+       line_count   - the number of lines between opening and closing braces
+       code_lines   - the number of lines excluding blanks, comments, and pod
+       type         - the block type (sub, for, foreach, ...)
+       name         - the block name if applicable (sub name, label, asub name)
+       depth        - the nesting depth of the opening block brace
+       max_change   - the change in depth to the most deeply nested code block
+       block_count  - the total number of code blocks nested in this block
+       mccabe_count - the McCabe complexity measure of this code block
+
+      This can be useful for code restructuring. The man page for perltidy
+      has more information and describes controls for selecting block types.
+
+    - This version was stress-tested for over 100 cpu hours with random
+      input parameters. No failures to converge, internal fault checks,
+      undefined variable references or other irregularities were seen.
+
+    - This version runs a few percent faster than the previous release on
+      large files due to optimizations made with the help of Devel::NYTProf.
+
+## 2022 11 12
+
+    - Fix rt #145095, undef warning in Perl before 5.12. Version 20221112 is
+      identical to 2022111 except for this fix for older versions of Perl.
+
+    - No significant bugs have been found since the last release to CPAN.
+      Several minor issues have been fixed, and some new parameters have been
+      added, as follows:
+
+    - Fixed rare problem with irregular indentation involving --cuddled-else,
+      usually also with the combination -xci and -lp.  Reported in rt #144979.
+
+    - Add option --weld-fat-comma (-wfc) for issue git #108. When -wfc
+      is set, along with -wn, perltidy is allowed to weld an opening paren
+      to an inner opening container when they are separated by a hash key
+      and fat comma (=>).  For example:
+
+        # perltidy -wn
+        elf->call_method(
+            method_name_foo => {
+                some_arg1       => $foo,
+                some_other_arg3 => $bar->{'baz'},
+            }
+        );
+
+        # perltidy -wn -wfc
+        elf->call_method( method_name_foo => {
+            some_arg1       => $foo,
+            some_other_arg3 => $bar->{'baz'},
+        } );
+
+      This flag is off by default.
+
+    - Fix issue git #106. This fixes some edge cases of formatting with the
+      combination -xlp -pt=2, mainly for two-line lists with short function
+      names. One indentation space is removed to improve alignment:
+
+        # OLD: perltidy -xlp -pt=2
+        is($module->VERSION, $expected,
+            "$main_module->VERSION matches $module->VERSION ($expected)");
+
+        # NEW: perltidy -xlp -pt=2
+        is($module->VERSION, $expected,
+           "$main_module->VERSION matches $module->VERSION ($expected)");
+
+    - Fix for issue git #105, incorrect formatting with 5.36 experimental
+      for_list feature.
+
+    - Fix for issue git #103. For parameter -b, or --backup-and-modify-in-place,
+      the default backup method has been changed to preserve the inode value
+      of the file being formatted.  If this causes a problem, the previous
+      method is available and can be used by setting -backup-mode='move', or
+      -bm='move'.  The new default corresponds to -bm='copy'.  The difference
+      between the two methods is as follows.  For the older method,
+      -bm='move', the input file was moved to the backup, and a new file was
+      created for the formatted output.  This caused the inode to change.  For
+      the new default method, -bm='copy', the input is copied to the backup
+      and then the input file is reopened and rewritten. This preserves the
+      file inode.  Tests have not produced any problems with this change, but
+      before using the --backup-and-modify-in-place parameter please verify
+      that it works correctly in your environment and operating system. The
+      initial update for this had an error which was caught and fixed
+      in git #109.
+
+    - Fix undefined value message when perltidy -D is used (git #104)
+
+    - Fixed an inconsistency in html colors near pointers when -html is used.
+      Previously, a '->' at the end of a line got the 'punctuation color', black
+      by default but a '->' before an identifier got the color of the following
+      identifier. Now all pointers get the same color, which is black by default.
+      Also, previously a word following a '->' was given the color of a bareword,
+      black by default, but now it is given the color of an identifier.
+
+    - Fixed incorrect indentation of any function named 'err'.  This was
+      due to some old code from when "use feature 'err'" was valid.
+
+            # OLD:
+            my ($curr) = current();
+              err (@_);
+
+            # NEW:
+            my ($curr) = current();
+            err(@_);
 
     - Added parameter --delete-repeated-commas (-drc) to delete repeated
-      commas. This is off by default. For example, given this line:
+      commas. This is off by default. For example, given:
 
             ignoreSpec( $file, "file",, \%spec, \%Rspec );
 
       # perltidy -drc:
             ignoreSpec( $file, "file", \%spec, \%Rspec );
+
+    - Add continuation indentation to long C-style 'for' terms; i.e.
+
+            # OLD
+            for (
+                $j = $i - $shell ;
+                $j >= 0
+                && ++$ncomp
+                && $array->[$j] gt $array->[ $j + $shell ] ;
+                $j -= $shell
+              )
+
+            # NEW
+            for (
+                $j = $i - $shell ;
+                $j >= 0
+                  && ++$ncomp
+                  && $array->[$j] gt $array->[ $j + $shell ] ;
+                $j -= $shell
+              )
+
+      This will change some existing formatting with very long 'for' terms.
+
+    - The following new parameters are available for manipulating
+      trailing commas of lists. They are described in the manual.
+
+           --want-trailing-commas=s, -wtc=s
+           --add-trailing-commas,    -atc
+           --delete-trailing-commas, -dtc
+           --delete-weld-interfering-commas, -dwic
+
+    - Files with errors due to missing, extra or misplaced parens, braces,
+      or square brackets are now written back out verbatim, without any
+      attempt at formatting.
+
+    - This version runs 10 to 15 percent faster than the previous
+      release on large files due to optimizations made with the help of
+      Devel::NYTProf.
+
+    - This version was stress-tested for over 200 cpu hours with random
+      input parameters. No failures to converge, internal fault checks,
+      undefined variable references or other irregularities were seen.
 
 ## 2022 06 13
 
@@ -293,7 +1253,7 @@
 
     - Added a new option '--code-skipping', requested in git #65, in which code
       between comment lines '#<<V' and '#>>V' is passed verbatim to the output
-      stream without error checking.  It is simmilar to --format-skipping
+      stream without error checking.  It is similar to --format-skipping
       but there is no error checking of the skipped code. This can be useful for
       skipping past code which employs an extended syntax.
 
@@ -467,21 +1427,21 @@
       were added to request that old breakpoints be kept before or after
       selected token types.  For example, -kbb='=>' means that newlines before
       fat commas should be kept.
- 
+
     - Fix git #44, fix exit status for assert-tidy/untidy.  The exit status was
       always 0 for --assert-tidy if the user had turned off all error messages with
       the -quiet flag.  This has been fixed.
 
     - Add flag -maxfs=n, --maximum-file-size-mb=n.  This parameter is provided to
-      avoid causing system problems by accidentally attempting to format an 
-      extremely large data file. The default is n=10.  The command to increase 
+      avoid causing system problems by accidentally attempting to format an
+      extremely large data file. The default is n=10.  The command to increase
       the limit to 20 MB for example would be  -mfs=20.  This only applies to
       files specified by filename on the command line.
 
-    - Skip formatting if there are too many indentation level errors.  This is 
-      controlled with -maxle=n, --maximum-level-errors=n.  This means that if 
+    - Skip formatting if there are too many indentation level errors.  This is
+      controlled with -maxle=n, --maximum-level-errors=n.  This means that if
       the ending indentation differs from the starting indentation by more than
-      n levels, the file will be output verbatim. The default is n=1. 
+      n levels, the file will be output verbatim. The default is n=1.
       To skip this check, set n=-1 or set n to a large number.
 
     - A related new flag, --maximum-unexpected-errors=n, or -maxue=n, is available
@@ -489,10 +1449,10 @@
 
     - Add flag -xci, --extended-continuation-indentation, regarding issue git #28
       This flag causes continuation indentation to "extend" deeper into structures.
-      Since this is a fairly new flag, the default is -nxci to avoid disturbing 
+      Since this is a fairly new flag, the default is -nxci to avoid disturbing
       existing formatting.  BUT you will probably see some improved formatting
-      in complex data structures by setting this flag if you currently use -ci=n 
-      and -i=n with the same value of 'n' (as is the case if you use -pbp, 
+      in complex data structures by setting this flag if you currently use -ci=n
+      and -i=n with the same value of 'n' (as is the case if you use -pbp,
       --perl-best-practices, where n=4).
 
     - Fix issue git #42, clarify how --break-at-old-logical-breakpoints works.
@@ -501,33 +1461,33 @@
 
     - Fix issue git #41, typo in manual regarding -fsb.
 
-    - Fix issue git #40: when using the -bli option, a closing brace followed by 
-      a semicolon was not being indented.  This applies to braces which require 
+    - Fix issue git #40: when using the -bli option, a closing brace followed by
+      a semicolon was not being indented.  This applies to braces which require
       semicolons, such as a 'do' block.
 
     - Added 'state' as a keyword.
 
     - A better test for convergence has been added. When iterations are requested,
       the new test will stop after the first pass if no changes in line break
-      locations are made.  Previously, file checksums were used and required at least two 
-      passes to verify convergence unless no formatting changes were made.  With the new test, 
-      only a single pass is needed when formatting changes are limited to adjustments of 
+      locations are made.  Previously, file checksums were used and required at least two
+      passes to verify convergence unless no formatting changes were made.  With the new test,
+      only a single pass is needed when formatting changes are limited to adjustments of
       indentation and whitespace on the lines of code.  Extensive testing has been made to
       verify the correctness of the new convergence test.
 
-    - Line breaks are now automatically placed after 'use overload' to 
+    - Line breaks are now automatically placed after 'use overload' to
       improve formatting when there are numerous overloaded operators.  For
       example
- 
+
         use overload
           '+' => sub {
           ...
 
     - A number of minor problems with parsing signatures and prototypes have
-      been corrected, particularly multi-line signatures. Some signatures 
-      had previously been parsed as if they were prototypes, which meant the 
+      been corrected, particularly multi-line signatures. Some signatures
+      had previously been parsed as if they were prototypes, which meant the
       normal spacing rules were not applied.  For example
-   
+
       OLD:
         sub echo ($message= 'Hello World!' ) {
             ...;
@@ -539,16 +1499,16 @@
         }
 
     - Numerous minor issues that the average user would not encounter were found
-      and fixed. They can be seen in the more complete list of updates at 
+      and fixed. They can be seen in the more complete list of updates at
 
            https://github.com/perltidy/perltidy/blob/master/local-docs/BugLog.pod
 
 ## 2020 10 01
 
-    - Robustness of perltidy has been significantly improved.  Updating is recommended. Continual 
-      automated testing runs began about 1 Sep 2020 and numerous issues have been found and fixed. 
+    - Robustness of perltidy has been significantly improved.  Updating is recommended. Continual
+      automated testing runs began about 1 Sep 2020 and numerous issues have been found and fixed.
       Many involve references to uninitialized variables when perltidy is fed random text and random
-      control parameters. 
+      control parameters.
 
     - Added the token '->' to the list of alignment tokens, as suggested in git
       #39, so that it can be vertically aligned if a space is placed before them with -wls='->'.
@@ -568,14 +1528,14 @@
       comments generated by the -csc parameter, a separating newline was missing.
       The resulting script will not then run, but worse, if it is reformatted with
       the same parameters then closing side comments could be overwritten and data
-      lost. 
+      lost.
 
       This problem was found during automated random testing.  The parameter
       -scbb is rarely used, which is probably why this has not been reported.  Please
       upgrade your version.
 
     - Added parameter --non-indenting-braces, or -nib, which prevents
-      code from indenting one level if it follows an opening brace marked 
+      code from indenting one level if it follows an opening brace marked
       with a special side comment, '#<<<'.  For example,
 
                     { #<<<   a closure to contain lexical vars
@@ -588,16 +1548,16 @@
 
       This is on by default.  If your code happens to have some
       opening braces followed by '#<<<', and you
-      don't want this, you can use -nnib to deactivate it. 
+      don't want this, you can use -nnib to deactivate it.
 
     - Side comment locations reset at a line ending in a level 0 open
-      block, such as when a new multi-line sub begins.  This is intended to 
+      block, such as when a new multi-line sub begins.  This is intended to
       help keep side comments from drifting to far to the right.
 
 ## 2020 08 22
 
     - Fix RT #133166, encoding not set for -st.  Also reported as RT #133171
-      and git #35. 
+      and git #35.
 
       This is a significant bug in version 20200616 which can corrupt data if
       perltidy is run as a filter on encoded text.
@@ -610,7 +1570,7 @@
     - Vertical alignment has been improved. Numerous minor issues have
       been fixed.
 
-    - Formatting with the -lp option is improved. 
+    - Formatting with the -lp option is improved.
 
     - Fixed issue git #32, misparse of bare 'ref' in ternary
 
@@ -622,7 +1582,7 @@
 
     - Added support for Switch::Plain syntax, issue git #31.
 
-    - Fixed minor problem where trailing 'unless' clauses were not 
+    - Fixed minor problem where trailing 'unless' clauses were not
       getting vertically aligned.
 
     - Added a parameter --logical-padding or -lop to allow logical padding
@@ -640,35 +1600,35 @@
       'teefile' call parameters.  These output streams are rarely used but
       they are now treated the same as any 'logfile' stream.
 
-    - add option --break-at-old-semicolon-breakpoints', -bos, requested 
+    - add option --break-at-old-semicolon-breakpoints', -bos, requested
       in RT#131644.  This flag will keep lines beginning with a semicolon.
 
     - Added --use-unicode-gcstring to control use of Unicode::GCString for
-      evaluating character widths of encoded data.  The default is 
+      evaluating character widths of encoded data.  The default is
       not to use this (--nouse-unicode-gcstring). If this flag is set,
-      perltidy will look for Unicode::GCString and, if found, will use it 
+      perltidy will look for Unicode::GCString and, if found, will use it
       to evaluate character display widths.  This can improve displayed
       vertical alignment for files with wide characters.  It is a nice
       feature but it is off by default to avoid conflicting formatting
-      when there are multiple developers.  Perltidy installation does not 
-      require Unicode::GCString, so users wanting to use this feature need 
+      when there are multiple developers.  Perltidy installation does not
+      require Unicode::GCString, so users wanting to use this feature need
       set this flag and also to install Unicode::GCString separately.
 
     - Added --character-encoding=guess or -guess to have perltidy guess
-      if a file (or other input stream) is encoded as -utf8 or some 
-      other single-byte encoding. This is useful when processing a mixture 
+      if a file (or other input stream) is encoded as -utf8 or some
+      other single-byte encoding. This is useful when processing a mixture
       of file types, such as utf8 and latin-1.
 
       Please Note: The default encoding has been set to be 'guess'
-      instead of 'none'. This seems like the best default, since 
+      instead of 'none'. This seems like the best default, since
       it allows perltidy work properly with both
       utf8 files and older latin-1 files.  The guess mode uses Encode::Guess,
-      which is included in standard perl distributions, and only tries to 
-      guess if a file is utf8 or not, never any other encoding.  If the guess is 
-      utf8, and if the file successfully decodes as utf8, then it the encoding 
-      is assumed to be utf8.  Otherwise, no encoding is assumed. 
-      If you do not want to use this new default guess mode, or have a 
-      problem with it, you can set --character-encoding=none (the previous 
+      which is included in standard perl distributions, and only tries to
+      guess if a file is utf8 or not, never any other encoding.  If the guess is
+      utf8, and if the file successfully decodes as utf8, then it the encoding
+      is assumed to be utf8.  Otherwise, no encoding is assumed.
+      If you do not want to use this new default guess mode, or have a
+      problem with it, you can set --character-encoding=none (the previous
       default) or --character-encoding=utf8 (if you deal with utf8 files).
 
     - Specific encodings of input files other than utf8 may now be given, for
@@ -689,11 +1649,11 @@
 ## 2020 01 10
 
     - This release adds a flag to control the feature RT#130394 (allow short nested blocks)
-      introduced in the previous release.  Unfortunately that feature breaks 
+      introduced in the previous release.  Unfortunately that feature breaks
       RPerl installations, so a control flag has been introduced and that feature is now
       off by default.  The flag is:
 
-      --one-line-block-nesting=n, or -olbn=n, where n is an integer as follows: 
+      --one-line-block-nesting=n, or -olbn=n, where n is an integer as follows:
 
       -olbn=0 break nested one-line blocks into multiple lines [new DEFAULT]
       -olbn=1 stable; keep existing nested-one line blocks intact [previous DEFAULT]
@@ -714,8 +1674,8 @@
     - Fixed issue RT#131288: parse error for un-prototyped constant function without parenthesized
       call parameters followed by ternary.
 
-    - Fixed issue RT#131360, installation documentation.  Added a note that the binary 
-      'perltidy' comes with the Perl::Tidy module. They can both normally be installed with 
+    - Fixed issue RT#131360, installation documentation.  Added a note that the binary
+      'perltidy' comes with the Perl::Tidy module. They can both normally be installed with
       'cpanm Perl::Tidy'
 
 
@@ -728,7 +1688,7 @@
     - Fixed issue RT#130394: Allow short nested blocks.  Given the following
 
         $factorial = sub { reduce { $a * $b } 1 .. 11 };
-   
+
       Previous versions would always break the sub block because it
       contains another block (the reduce block).  The fix keeps
       short one-line blocks such as this intact.
@@ -738,19 +1698,19 @@
       one or more aliases for 'sub', separated by spaces or commas.
       For example,
 
-        perltidy -sal='method fun' 
+        perltidy -sal='method fun'
 
       will cause the perltidy to treat the words 'method' and 'fun' to be
       treated the same as if they were 'sub'.
 
-    - Added flag --space-prototype-paren=i, or -spp=i, to control spacing 
+    - Added flag --space-prototype-paren=i, or -spp=i, to control spacing
       before the opening paren of a prototype, where i=0, 1, or 2:
       i=0 no space
       i=1 follow input [current and default]
       i=2 always space
 
       Previously, perltidy always followed the input.
-      For example, given the following input 
+      For example, given the following input
 
          sub usage();
 
@@ -768,16 +1728,16 @@
 
 ## 2019 09 15
 
-    - fixed issue RT#130344: false warning "operator in print statement" 
-      for "use lib". 
+    - fixed issue RT#130344: false warning "operator in print statement"
+      for "use lib".
 
     - fixed issue RT#130304: standard error output should include filename.
-      When perltidy error messages are directed to the standard error output 
-      with -se or --standard-error-output, the message lines now have a prefix 
-      'filename:' for clarification in case multiple files 
-      are processed, where 'filename' is the name of the input file.  If 
-      input is from the standard input the displayed filename is '<stdin>', 
-      and if it is from a data structure then displayed filename 
+      When perltidy error messages are directed to the standard error output
+      with -se or --standard-error-output, the message lines now have a prefix
+      'filename:' for clarification in case multiple files
+      are processed, where 'filename' is the name of the input file.  If
+      input is from the standard input the displayed filename is '<stdin>',
+      and if it is from a data structure then displayed filename
       is '<source_stream>'.
 
     - implement issue RT#130425: check mode.  A new flag '--assert-tidy'
@@ -786,8 +1746,8 @@
       has also been added.  The next item, RT#130297, insures that the script
       will exit with a non-zero exit flag if the assertion fails.
 
-    - fixed issue RT#130297; the perltidy script now exits with a nonzero exit 
-      status if it wrote to the standard error output. Prevously only fatal
+    - fixed issue RT#130297; the perltidy script now exits with a nonzero exit
+      status if it wrote to the standard error output. Previously only fatal
       run errors produced a non-zero exit flag. Now, even non-fatal messages
       requested with the -w flag will cause a non-zero exit flag.  The exit
       flag now has these values:
@@ -810,7 +1770,7 @@
     - fixed issue git#13, needless trailing whitespace in error message
 
     - fixed issue git#9: if the -ce (--cuddled-else) flag is used,
-      do not try to form new one line blocks for a block type 
+      do not try to form new one line blocks for a block type
       specified with -cbl, particularly map, sort, grep
 
     - iteration speedup for unchanged code.  Previously, when iterations were
@@ -821,7 +1781,7 @@
 
 ## 2019 06 01
 
-    - rt #128477: Prevent inconsistent owner/group and setuid/setgid bits. 
+    - rt #128477: Prevent inconsistent owner/group and setuid/setgid bits.
       In the -b (--backup-and-modify-in-place) mode, an attempt is made to set ownership
       of the output file equal to the input file, if they differ.
       In all cases, if the final output file ownership differs from input file, any setuid/setgid bits are cleared.
@@ -1116,7 +2076,7 @@
     - RT #123749, partial fix.  "Continuation indentation" is removed from lines 
       with leading closing parens which are part of a call chain. 
       For example, the call to pack() is is now outdented to the starting 
-      indentation in the following experession:  
+      indentation in the following expression:
 
           # OLD
           $mw->Button(
@@ -1841,7 +2801,7 @@
       -it>1.
 
     - Fixed bug where a line occasionally ended with an extra space. This reduces
-      rhe number of instances where a second iteration gives a result different
+      the number of instances where a second iteration gives a result different
       from the first. 
 
     - Updated documentation to note that the Tidy.pm module <stderr> parameter may
@@ -1915,7 +2875,7 @@
 
     - Allow configuration file to be 'perltidy.ini' for Windows systems.
       i.e. C:\Documents and Settings\User\perltidy.ini
-      and added documentation for setting configuation file under Windows in man
+      and added documentation for setting configuration file under Windows in man
       page.  Thanks to Stuart Clark.
 
     - Corrected problem of unwanted semicolons in hash ref within given/when code.
@@ -2558,7 +3518,7 @@
 
      Thanks to Mark Olesen for suggesting this.
 
-    -Improved alignement of '='s in certain cases.
+    -Improved alignment of '='s in certain cases.
      Thanks to Norbert Gruener for sending an example.
 
     -Outdent-long-comments (-olc) has been re-instated as a default, since
@@ -2826,7 +3786,7 @@
        );
 
     -Lists which do not format well in uniform columns are now better
-     identified and formated.
+     identified and formatted.
 
        OLD:
        return $c->create( 'polygon', $x, $y, $x + $ruler_info{'size'},
@@ -2878,7 +3838,7 @@
      to control what text is appended to 'else' and 'elsif' blocks.
      Default is to just add leading 'if' text to an 'else'.  See manual.
 
-    -The -csc option now labels 'else' blocks with additinal information
+    -The -csc option now labels 'else' blocks with additional information
      from the opening if statement and elsif statements, if space.
      Thanks to Wolfgang Weisselberg for suggesting this.
 
@@ -2987,7 +3947,7 @@
                      '92', '94', '96', '98', '100', '102', '104'
                      );
 
-    -Lists of complex items, such as matricies, are now detected
+    -Lists of complex items, such as matrices, are now detected
      and displayed with just one item per row:
 
        OLD:
@@ -3096,7 +4056,7 @@
        if ( ( $tmp >= 0x80_00_00 ) || ( $tmp < -0x80_00_00 ) ) { }
 
     -'**=' was incorrectly tokenized as '**' and '='.  This only
-        caused a problem with the -extrude opton.
+        caused a problem with the -extrude option.
 
     -Corrected a divide by zero when -extrude option is used
 

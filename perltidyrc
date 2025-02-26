@@ -1,0 +1,69 @@
+# perltidyrc file for perltidy itself
+# Note:
+# - This is not named .perltidyrc because that could interfere
+#   with testing. This has to be requested with -pro=perltidyrc
+# - Formatting without these parameters remains stable, so it is not
+#   necessary to format with these parameters every time. But it should
+#   be done before a commit.
+
+# warnings
+--warning-output
+
+# all if-elsif chains must end in an else block
+--warn-missing-else
+
+# warn if certain of the 'unusual' variables are seen
+# variable names ending in '_uu' are excluded from warnings
+--warn-variable-types='*'
+--warn-variable-exclusion-list='$self $class *_uu'
+
+# Warn if any unexpected hash keys are seen. To prevent a known unique
+# hash key such as 'maximum_line_length' from being found, a line
+# such as the following is placed in the corresponding source code:
+#    my @unique_hash_keys_uu = qw( maximum_line_length );
+# The name '@unique_hash_keys_uu' is arbitrary but should end in _uu
+# to be itself excluded from warnings, as noted above.
+# The cutoff number N is set at the default 1 except when -debug is used
+--warn-unique-keys
+--warn-unique-keys-cutoff=1
+
+# warn if call arg counts differ from sub definitions
+# (requires version > 20240202.04)
+--warn-mismatched-args
+--warn-mismatched-arg-undercount-cutoff=0
+
+# warn if return count wanted differs from sub return statements
+--warn-mismatched-returns
+
+# user-defined subs must have args in parens
+--want-call-parens='&'
+
+# Add closing side comments for subs, asubs, and while blocks
+# while blocks are marked because they can be tricky to get right.
+# The default interval (-csci=6) is used but a value of 10 might
+# be a little better. But changing -csci would change a lot of lines.
+--closing-side-comments
+--closing-side-comment-list='sub asub while'
+
+# remove non-bare trailing commas
+# add trailing commas to key=>value hash lists
+# The + - notation requires version >= 20240903.03
+--want-trailing-commas='-b +h'
+--delete-trailing-commas
+--add-trailing-commas
+
+# For now, require arrows at asymmetric bracket combinations
+--add-interbracket-arrows
+--interbracket-arrow-style=']->{ }->['
+
+# Use 'perltidy -dmcp filename' to find mixed call paren usage.
+# Prefer call parens for these keywords:
+--want-call-parens='open unlink substr defined ref scalar int'
+
+# This defines a new option which is invoked with -debug on the command line.
+# It overrides any of the settings above.
+debug {
+   --warn-similar-keys
+   --warn-unique-keys
+   --warn-unique-keys-cutoff=2
+}
